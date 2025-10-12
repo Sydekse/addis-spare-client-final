@@ -36,7 +36,7 @@ export default function FilterSidebar({ categories }: FilterSidebarProps) {
       params.set("category", categoryId)
     }
 
-    router.push(`/products?${params.toString()}`)
+    router.push(`/?${params.toString()}`)
   }
 
   const handlePriceChange = (values: number[]) => {

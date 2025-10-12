@@ -41,7 +41,7 @@ export default function SearchHeader({ makes, models, years }: SearchHeaderProps
     if (selectedYear !== "all") params.set("year", selectedYear)
     if (searchQuery.trim()) params.set("q", searchQuery.trim())
 
-    router.push(`/products?${params.toString()}`)
+    router.push(`/?${params.toString()}`)
   }
 
   return (
