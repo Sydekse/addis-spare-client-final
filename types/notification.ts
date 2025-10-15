@@ -1,13 +1,29 @@
+export interface NotificationRelatedTo {
+  entity: string;
+  id: string;
+}
+
+export interface Notification {
+  id: string;
+  userId: string;
+  channel: NotificationChannel;
+  subject: string;
+  message: string;
+  relatedTo?: NotificationRelatedTo;
+  status: NotificationStatus;
+  createdAt: Date;
+  sentAt?: Date;
+}
 export enum NotificationStatus {
-  PENDING = 'PENDING',
-  FAILED = 'FAILED',
-  SENT = 'SENT',
+  PENDING = "PENDING",
+  FAILED = "FAILED",
+  SENT = "SENT",
 }
 
 export enum NotificationChannel {
-  SMS = 'SMS',
-  GMAIL = 'GMAIL',
-  IN_APP = 'IN-APP',
+  SMS = "SMS",
+  GMAIL = "GMAIL",
+  IN_APP = "IN-APP",
 }
 
 export interface NotificationRelatedTo {
@@ -43,7 +59,7 @@ export interface Notification {
   relatedTo?: NotificationRelatedTo;
   status: NotificationStatus;
   createdAt: Date;
-  sentAt: Date;
+  sentAt?: Date;
 }
 
 export interface PWDSubscribeDto {

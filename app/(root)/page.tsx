@@ -5,7 +5,6 @@ import ProductsSkeletonGrid from "@/components/products/products-skeleton-grid";
 import SearchHeader from "@/components/products/search-header";
 import { Product } from "@/types/product";
 import { getProducts } from "@/lib/api/services/product.service";
-import { Header } from "@/components/headers/Header";
 import { Footer } from "@/components/layout/footer";
 
 interface CategoryOption {
@@ -47,7 +46,9 @@ export default async function ProductsPage() {
   );
 
   // Makes
-  const makesSet = new Set(initialProducts.flatMap((p) => p.compatibility.map((c) => c.make)));
+  const makesSet = new Set(
+    initialProducts.flatMap((p) => p.compatibility.map((c) => c.make))
+  );
   const makes: MakeOption[] = Array.from(makesSet).map((make, index) => ({
     id: `make-${index}`,
     name: make,
@@ -63,16 +64,19 @@ export default async function ProductsPage() {
   });
 
   let modelIdCounter = 0;
-  const models: ModelOption[] = Object.entries(modelsMap).flatMap(([make, modelsSet]) =>
-    Array.from(modelsSet).map((model) => ({
-      id: `model-${modelIdCounter++}`,
-      name: model,
-      makeId: makes.find((m) => m.name === make)?.id || "",
-    }))
+  const models: ModelOption[] = Object.entries(modelsMap).flatMap(
+    ([make, modelsSet]) =>
+      Array.from(modelsSet).map((model) => ({
+        id: `model-${modelIdCounter++}`,
+        name: model,
+        makeId: makes.find((m) => m.name === make)?.id || "",
+      }))
   );
 
   // Years
-  const yearsSet = new Set(initialProducts.flatMap((p) => p.compatibility.map((c) => c.year)));
+  const yearsSet = new Set(
+    initialProducts.flatMap((p) => p.compatibility.map((c) => c.year))
+  );
   const years: YearOption[] = Array.from(yearsSet)
     .sort((a, b) => a - b)
     .map((year, index) => ({
@@ -95,9 +99,7 @@ export default async function ProductsPage() {
           {/* Sticky sidebar with hidden scrollbar */}
           <div className="w-64 h-[calc(100vh-180px)] sticky top-[180px] hidden md:block">
             <div className="h-full overflow-auto hide-scrollbar">
-              <FilterSidebar
-                categories={categories}
-              />
+              <FilterSidebar categories={categories} />
             </div>
           </div>
 

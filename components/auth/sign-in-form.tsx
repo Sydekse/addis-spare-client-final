@@ -69,9 +69,12 @@ export default function SignInForm() {
       console.log("User signed in:", response);
 
       router.push("/");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Login error:", error);
-      alert(error?.message || "Invalid email or password. Please try again.");
+      alert(
+        (error as { message?: string })?.message ||
+          "Invalid email or password. Please try again."
+      );
     } finally {
       setIsLoading(false);
     }

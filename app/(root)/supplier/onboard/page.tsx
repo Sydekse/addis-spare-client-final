@@ -41,7 +41,6 @@ import {
   Upload,
   Save,
   X,
-  ArrowLeft,
   Edit3,
   CheckCircle,
 } from "lucide-react";
@@ -117,6 +116,8 @@ export default function Page() {
             }));
           }
         } catch (err) {
+          // Log error for debugging and show user-friendly message
+          console.error("File upload failed:", err);
           toast.error("Unable to upload file");
         }
       }

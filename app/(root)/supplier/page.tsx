@@ -1,17 +1,23 @@
 "use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { 
-  TrendingUp, 
-  Package, 
-  ShoppingCart, 
+import {
+  TrendingUp,
+  Package,
+  ShoppingCart,
   AlertTriangle,
   DollarSign,
   Eye,
   Plus,
-  ArrowUpRight
+  ArrowUpRight,
 } from "lucide-react";
 
 const statsData = [
@@ -21,7 +27,7 @@ const statsData = [
     change: "+12.5%",
     trend: "up",
     description: "This month",
-    icon: DollarSign
+    icon: DollarSign,
   },
   {
     title: "Orders Today",
@@ -29,7 +35,7 @@ const statsData = [
     change: "+8.2%",
     trend: "up",
     description: "vs yesterday",
-    icon: ShoppingCart
+    icon: ShoppingCart,
   },
   {
     title: "Active Products",
@@ -37,7 +43,7 @@ const statsData = [
     change: "+23",
     trend: "up",
     description: "Total listed",
-    icon: Package
+    icon: Package,
   },
   {
     title: "Low Stock Alerts",
@@ -45,8 +51,8 @@ const statsData = [
     change: "-3",
     trend: "down",
     description: "Need attention",
-    icon: AlertTriangle
-  }
+    icon: AlertTriangle,
+  },
 ];
 
 const recentOrders = [
@@ -56,7 +62,7 @@ const recentOrders = [
     items: "Brake Pads Set",
     amount: "ETB 4,500",
     status: "pending",
-    time: "2 hours ago"
+    time: "2 hours ago",
   },
   {
     id: "ORD-002",
@@ -64,7 +70,7 @@ const recentOrders = [
     items: "Engine Oil Filter",
     amount: "ETB 850",
     status: "paid",
-    time: "4 hours ago"
+    time: "4 hours ago",
   },
   {
     id: "ORD-003",
@@ -72,7 +78,7 @@ const recentOrders = [
     items: "Spark Plugs (4x)",
     amount: "ETB 2,200",
     status: "shipped",
-    time: "6 hours ago"
+    time: "6 hours ago",
   },
   {
     id: "ORD-004",
@@ -80,8 +86,8 @@ const recentOrders = [
     items: "Air Filter",
     amount: "ETB 650",
     status: "delivered",
-    time: "1 day ago"
-  }
+    time: "1 day ago",
+  },
 ];
 
 const lowStockProducts = [
@@ -90,55 +96,62 @@ const lowStockProducts = [
     name: "Brake Pads - Honda Civic",
     currentStock: 3,
     threshold: 10,
-    status: "critical"
+    status: "critical",
   },
   {
     sku: "OF-052",
     name: "Oil Filter - Toyota Camry",
     currentStock: 7,
     threshold: 15,
-    status: "low"
+    status: "low",
   },
   {
     sku: "SP-203",
     name: "Spark Plugs - Ford Focus",
     currentStock: 12,
     threshold: 20,
-    status: "low"
-  }
+    status: "low",
+  },
 ];
 
 const quickActions = [
   { label: "Add Product", icon: Plus, action: "add-product" },
   { label: "View Orders", icon: Eye, action: "view-orders" },
-  { label: "Inventory Report", icon: Package, action: "inventory-report" }
+  { label: "Inventory Report", icon: Package, action: "inventory-report" },
 ];
 
 export default function DashboardPage() {
   const onNavigate = (page: string) => {
-    console.log("Navigate to:", page); 
+    console.log("Navigate to:", page);
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "pending": return "bg-yellow-100 text-yellow-800";
-      case "paid": return "bg-blue-100 text-blue-800";
-      case "shipped": return "bg-purple-100 text-purple-800";
-      case "delivered": return "bg-green-100 text-green-800";
-      case "critical": return "bg-red-100 text-red-800";
-      case "low": return "bg-orange-100 text-orange-800";
-      default: return "bg-gray-100 text-gray-800";
+      case "pending":
+        return "bg-yellow-100 text-yellow-800";
+      case "paid":
+        return "bg-blue-100 text-blue-800";
+      case "shipped":
+        return "bg-purple-100 text-purple-800";
+      case "delivered":
+        return "bg-green-100 text-green-800";
+      case "critical":
+        return "bg-red-100 text-red-800";
+      case "low":
+        return "bg-orange-100 text-orange-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
 
-return (
+  return (
     <div className="space-y-6">
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Dashboard</h1>
           <p className="text-muted-foreground">
-            Welcome back! Here's what's happening with your store.
+            Welcome back! Here is what is happening with your store.
           </p>
         </div>
         <div className="flex gap-3">
@@ -161,7 +174,9 @@ return (
         {statsData.map((stat, index) => (
           <Card key={index}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                {stat.title}
+              </CardTitle>
               <stat.icon className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -196,7 +211,11 @@ return (
                 Latest customer orders requiring attention
               </CardDescription>
             </div>
-            <Button variant="ghost" size="sm" onClick={() => onNavigate("orders")}>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onNavigate("orders")}
+            >
               View All
               <ArrowUpRight className="ml-1 h-4 w-4" />
             </Button>
@@ -256,7 +275,9 @@ return (
                       {product.status}
                     </Badge>
                   </div>
-                  <p className="text-sm text-muted-foreground">{product.name}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {product.name}
+                  </p>
                 </div>
                 <div className="text-right">
                   <p className="font-medium">{product.currentStock} left</p>

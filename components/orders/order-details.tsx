@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import {
   Card,
   CardContent,
@@ -26,7 +26,6 @@ import {
   ArrowLeft,
   Package,
   User,
-  MapPin,
   CreditCard,
   RefreshCw,
   Download,
@@ -34,35 +33,35 @@ import {
   MessageSquare,
 } from "lucide-react";
 import { Order, OrderItem, OrderStatus } from "@/types/order";
-import { getOrderById } from "@/lib/api/services/order.service";
-import { findUserById } from "@/lib/api/services/user.service";
+// order/user lookups are not used in this component (data is passed via props)
 import { getProductById } from "@/lib/api/services/product.service";
 import Image from "next/image";
 
-export default function OrderDetailPage({ ord }: {ord: Order}) {
+export default function OrderDetailPage({ ord }: { ord: Order }) {
   const router = useRouter();
-  const [orderStatus, setOrderStatus] = useState<OrderStatus>(OrderStatus.PENDING);
+  const [orderStatus, setOrderStatus] = useState<OrderStatus>(
+    OrderStatus.PENDING
+  );
   const [trackingNumber, setTrackingNumber] = useState("");
   const [notes, setNotes] = useState("");
-  const [order, setOrder ] = useState<Order>(ord);
+  const [order, setOrder] = useState<Order>(ord);
 
   useEffect(() => {
     const fetchProducts = async () => {
-        const items: OrderItem[] = []
-        for (const item of order.items) {
-            const product = await getProductById(item.productId);
-            const it = {
-                product,
-                ...item
-            };
-            items.push(it);
-        }
+      const items: OrderItem[] = [];
+      for (const item of ord.items) {
+        const product = await getProductById(item.productId);
+        items.push({ product, ...item });
+      }
 
-        setOrder({...order, items})
+      setOrder((prev) => ({ ...prev, items }));
+    };
+
+    // Fetch product details for items once when the component mounts or when the order prop changes
+    if (ord?.items && ord.items.length > 0) {
+      fetchProducts();
     }
-    fetchProducts();
-
-  }, [])   
+  }, [ord]);
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -81,20 +80,15 @@ export default function OrderDetailPage({ ord }: {ord: Order}) {
     }
   };
 
-  const formatDate = (dateString: string) =>
-    new Date(dateString).toLocaleDateString("en-IN", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-      hour: "2-digit",
-    minute: "2-digit",
-    });
-
-  const formatAddress = (address: any) =>
-    `${address.street}, ${address.city}, ${address.state} - ${address.pincode}, ${address.country}`;
+  // Note: formatDate and formatAddress helpers removed because they were unused in this component.
 
   const handleStatusUpdate = () => {
-    console.log("Updating order status:", { id: order.id, orderStatus, trackingNumber, notes });
+    console.log("Updating order status:", {
+      id: order.id,
+      orderStatus,
+      trackingNumber,
+      notes,
+    });
   };
 
   const handleRefund = () => {
@@ -106,12 +100,18 @@ export default function OrderDetailPage({ ord }: {ord: Order}) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => router.push("/supplier/orders")}>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => router.push("/supplier/orders")}
+          >
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
             <h1 className="text-3xl font-bold">Order {order.id}</h1>
-            <p className="text-muted-foreground">Placed on {order.placedAt.toLocaleString()}</p>
+            <p className="text-muted-foreground">
+              Placed on {order.placedAt.toLocaleString()}
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-3">
@@ -139,11 +139,21 @@ export default function OrderDetailPage({ ord }: {ord: Order}) {
                     key={item.productId}
                     className="flex items-center gap-4 p-4 border rounded-lg"
                   >
-                    <Image src={item.product?.images[0] || "/image.jpg"} alt={item.name} width={64} height={64} className="h-16 w-16 rounded object-cover" />
+                    <Image
+                      src={item.product?.images[0] || "/image.jpg"}
+                      alt={item.name}
+                      width={64}
+                      height={64}
+                      className="h-16 w-16 rounded object-cover"
+                    />
                     <div className="flex-1">
                       <h4 className="font-medium">{item.name}</h4>
-                      <p className="text-sm text-muted-foreground">SKU: {item.sku}</p>
-                      <p className="text-sm text-muted-foreground">Quantity: {item.quantity}</p>
+                      <p className="text-sm text-muted-foreground">
+                        SKU: {item.sku}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        Quantity: {item.quantity}
+                      </p>
                     </div>
                     <div className="text-right">
                       <p className="font-medium">
@@ -177,7 +187,10 @@ export default function OrderDetailPage({ ord }: {ord: Order}) {
                   <div className="flex justify-between text-green-600">
                     <span>Discounts:</span>
                     <span>
-                      -ETB {order.discounts.reduce((acc, d) => acc + d.amount, 0).toLocaleString()}
+                      -ETB{" "}
+                      {order.discounts
+                        .reduce((acc, d) => acc + d.amount, 0)
+                        .toLocaleString()}
                     </span>
                   </div>
                 )}
@@ -196,13 +209,19 @@ export default function OrderDetailPage({ ord }: {ord: Order}) {
               <CardTitle className="flex items-center gap-2">
                 <RefreshCw className="h-5 w-5" /> Update Order Status
               </CardTitle>
-              <CardDescription>Change the order status and add tracking info</CardDescription>
+              <CardDescription>
+                Change the order status and add tracking info
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid gap-4 md:grid-cols-2">scr
+              <div className="grid gap-4 md:grid-cols-2">
+                scr
                 <div className="space-y-2">
                   <Label>Order Status</Label>
-                  <Select value={orderStatus} onValueChange={(v) => setOrderStatus(v)}>
+                  <Select
+                    value={orderStatus}
+                    onValueChange={(v) => setOrderStatus(v as OrderStatus)}
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -242,7 +261,11 @@ export default function OrderDetailPage({ ord }: {ord: Order}) {
                   <RefreshCw className="h-4 w-4" /> Update Status
                 </Button>
                 {orderStatus === OrderStatus.PAID && (
-                  <Button variant="destructive" onClick={handleRefund} className="gap-2">
+                  <Button
+                    variant="destructive"
+                    onClick={handleRefund}
+                    className="gap-2"
+                  >
                     <AlertTriangle className="h-4 w-4" /> Process Refund
                   </Button>
                 )}
@@ -263,7 +286,9 @@ export default function OrderDetailPage({ ord }: {ord: Order}) {
             <CardContent className="space-y-4">
               <div>
                 <p className="font-medium">{order.customer?.name}</p>
-                <p className="text-sm text-muted-foreground">{order.customer?.email}</p>
+                <p className="text-sm text-muted-foreground">
+                  {order.customer?.email}
+                </p>
               </div>
               <Button variant="outline" size="sm" className="w-full gap-2">
                 <MessageSquare className="h-4 w-4" /> Send Message
@@ -295,11 +320,15 @@ export default function OrderDetailPage({ ord }: {ord: Order}) {
             <CardContent>
               <div className="flex justify-between">
                 <span>Amount:</span>
-                <span className="font-medium">ETB {order.total.toLocaleString()}</span>
+                <span className="font-medium">
+                  ETB {order.total.toLocaleString()}
+                </span>
               </div>
               <div className="flex justify-between">
                 <span>Status:</span>
-                <Badge className={getStatusColor(order.status)}>{order.status}</Badge>
+                <Badge className={getStatusColor(order.status)}>
+                  {order.status}
+                </Badge>
               </div>
             </CardContent>
           </Card>

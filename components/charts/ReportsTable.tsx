@@ -1,50 +1,77 @@
 "use client";
-import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, ArrowUpDown } from 'lucide-react';
+import { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Search, ArrowUpDown } from "lucide-react";
 
 interface ReportsTableProps {
   title: string;
   columns: string[];
-  data: any[];
+  data: Record<string, unknown>[];
   keyMapping: Record<string, string>;
   className?: string;
 }
 
-export function ReportsTable({ title, columns, data, keyMapping, className }: ReportsTableProps) {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [sortColumn, setSortColumn] = useState<string>('');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+export function ReportsTable({
+  title,
+  columns,
+  data,
+  keyMapping,
+  className,
+}: ReportsTableProps) {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortColumn, setSortColumn] = useState<string>("");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [pageSize, setPageSize] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
 
   // Filter data based on search term
-  const filteredData = data.filter(item => {
-    return Object.values(item).some(value => 
-      value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredData = data.filter((item) => {
+    return Object.values(item).some((value) =>
+      String(value ?? "")
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase())
     );
   });
 
   // Sort data
   const sortedData = [...filteredData].sort((a, b) => {
     if (!sortColumn) return 0;
-    
-    const aValue = a[keyMapping[sortColumn]];
-    const bValue = b[keyMapping[sortColumn]];
-    
+
+    const aValue = (a as Record<string, unknown>)[keyMapping[sortColumn]];
+    const bValue = (b as Record<string, unknown>)[keyMapping[sortColumn]];
+
     // Handle different data types
-    if (typeof aValue === 'number' && typeof bValue === 'number') {
-      return sortDirection === 'asc' ? aValue - bValue : bValue - aValue;
+    if (typeof aValue === "number" && typeof bValue === "number") {
+      return sortDirection === "asc" ? aValue - bValue : bValue - aValue;
     }
-    
-    const aString = aValue?.toString() || '';
-    const bString = bValue?.toString() || '';
-    
-    if (sortDirection === 'asc') {
+
+    const aString = aValue?.toString() || "";
+    const bString = bValue?.toString() || "";
+
+    if (sortDirection === "asc") {
       return aString.localeCompare(bString);
     } else {
       return bString.localeCompare(aString);
@@ -58,36 +85,45 @@ export function ReportsTable({ title, columns, data, keyMapping, className }: Re
 
   const handleSort = (column: string) => {
     if (sortColumn === column) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
     } else {
       setSortColumn(column);
-      setSortDirection('asc');
+      setSortDirection("asc");
     }
   };
 
-  const formatCellValue = (value: any, key: string) => {
-    if (value === null || value === undefined) return '-';
-    
+  const formatCellValue = (value: unknown, key: string) => {
+    if (value === null || value === undefined) return "-";
+
     // Format currency values
-    if (key.includes('price') || key.includes('revenue') || key.includes('value') || key.includes('amount')) {
-      if (typeof value === 'number') {
+    if (
+      key.includes("price") ||
+      key.includes("revenue") ||
+      key.includes("value") ||
+      key.includes("amount")
+    ) {
+      if (typeof value === "number") {
         return `ETB ${value.toLocaleString()}`;
       }
     }
-    
+
     // Format dates
-    if (key.includes('date') || key.includes('At')) {
-      if (typeof value === 'string' && value.includes('-')) {
-        return new Date(value).toLocaleDateString('en-IN');
+    if (key.includes("date") || key.includes("At")) {
+      if (typeof value === "string" && value.includes("-")) {
+        return new Date(value).toLocaleDateString("en-IN");
       }
     }
-    
+
     // Format numbers
-    if (typeof value === 'number' && !key.includes('price') && !key.includes('revenue')) {
+    if (
+      typeof value === "number" &&
+      !key.includes("price") &&
+      !key.includes("revenue")
+    ) {
       return value.toLocaleString();
     }
-    
-    return value.toString();
+
+    return String(value);
   };
 
   return (
@@ -97,7 +133,7 @@ export function ReportsTable({ title, columns, data, keyMapping, className }: Re
         <CardDescription>
           Showing {paginatedData.length} of {sortedData.length} records
         </CardDescription>
-        
+
         {/* Search and Filters */}
         <div className="flex flex-col sm:flex-row gap-4 pt-4">
           <div className="relative flex-1">
@@ -112,11 +148,14 @@ export function ReportsTable({ title, columns, data, keyMapping, className }: Re
               className="pl-10"
             />
           </div>
-          
-          <Select value={pageSize.toString()} onValueChange={(value) => {
-            setPageSize(parseInt(value));
-            setCurrentPage(1);
-          }}>
+
+          <Select
+            value={pageSize.toString()}
+            onValueChange={(value) => {
+              setPageSize(parseInt(value));
+              setCurrentPage(1);
+            }}
+          >
             <SelectTrigger className="w-[120px]">
               <SelectValue />
             </SelectTrigger>
@@ -129,14 +168,14 @@ export function ReportsTable({ title, columns, data, keyMapping, className }: Re
           </Select>
         </div>
       </CardHeader>
-      
+
       <CardContent>
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
                 {columns.map((column) => (
-                  <TableHead 
+                  <TableHead
                     key={column}
                     className="cursor-pointer hover:bg-muted/50 select-none"
                     onClick={() => handleSort(column)}
@@ -154,7 +193,10 @@ export function ReportsTable({ title, columns, data, keyMapping, className }: Re
                 <TableRow key={index}>
                   {columns.map((column) => (
                     <TableCell key={column}>
-                      {formatCellValue(row[keyMapping[column]], keyMapping[column])}
+                      {formatCellValue(
+                        row[keyMapping[column]],
+                        keyMapping[column]
+                      )}
                     </TableCell>
                   ))}
                 </TableRow>
@@ -169,7 +211,7 @@ export function ReportsTable({ title, columns, data, keyMapping, className }: Re
             <div className="text-sm text-muted-foreground">
               Page {currentPage} of {totalPages}
             </div>
-            
+
             <div className="flex gap-2">
               <Button
                 variant="outline"
@@ -193,7 +235,9 @@ export function ReportsTable({ title, columns, data, keyMapping, className }: Re
 
         {paginatedData.length === 0 && (
           <div className="text-center py-8">
-            <p className="text-muted-foreground">No records found matching your search criteria</p>
+            <p className="text-muted-foreground">
+              No records found matching your search criteria
+            </p>
           </div>
         )}
       </CardContent>

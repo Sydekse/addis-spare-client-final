@@ -1,7 +1,7 @@
 // app/supplier/products/add/page.tsx or edit/page.tsx
 "use client";
 
-import { useActionState, useState } from "react";
+import { useState } from "react";
 import {
   Card,
   CardContent,
@@ -22,16 +22,12 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { Upload, X, Plus, Save, Eye, ArrowLeft, ImageIcon } from "lucide-react";
+import { X, Plus, Eye, ArrowLeft, ImageIcon } from "lucide-react";
 import { useCloudinaryUpload } from "@/lib/cloudinary/uploadImage";
 import { toast } from "sonner";
 import { CreateProductDto } from "@/types/product";
 import { createProduct } from "@/lib/api/services/product.service";
-
-interface ProductPageProps {
-  mode: "add" | "edit";
-  productId?: string;
-}
+import Image from "next/image";
 
 interface CompatibilityEntry {
   id: string;
@@ -51,8 +47,9 @@ const categories = [
   "Interior",
 ];
 
-export default function ProductPage({ mode, productId }: ProductPageProps) {
-  mode = mode || "add";
+export default function ProductPage() {
+  const [mode, setMode] = useState<"add" | "edit">("edit");
+
   const [formData, setFormData] = useState({
     name: mode === "edit" ? "Brake Pads Set - Honda Civic 2018-2023" : "",
     sku: mode === "edit" ? "BP-HC-001" : "",
@@ -85,6 +82,7 @@ export default function ProductPage({ mode, productId }: ProductPageProps) {
   const { uploadImage, loading } = useCloudinaryUpload();
 
   const handleAddCompatibility = () => {
+    setMode("add");
     setCompatibility([
       ...compatibility,
       { id: Date.now().toString(), make: "", model: "", year: "" },
@@ -122,6 +120,8 @@ export default function ProductPage({ mode, productId }: ProductPageProps) {
             setImages((prev) => [...prev, data.secure_url]);
           }
         } catch (err) {
+          // Log error for debugging
+          console.error("Image upload failed:", err);
           toast.error("Unable to upload image");
         }
       }
@@ -140,7 +140,7 @@ export default function ProductPage({ mode, productId }: ProductPageProps) {
         model: c.model,
         year: Number(c.year),
       }));
-  
+
       const attributes = {
         threadSize: "M14x1.5",
         seatType: "Conical",
@@ -149,7 +149,7 @@ export default function ProductPage({ mode, productId }: ProductPageProps) {
         material: "Steel",
         splineCount: 12,
       };
-  
+
       const productDTO: CreateProductDto = {
         name: formData.name,
         description: formData.description,
@@ -163,14 +163,14 @@ export default function ProductPage({ mode, productId }: ProductPageProps) {
         stockControlled: formData.stockControlled,
         compatibility: mappedCompatibility,
       };
-  
+
       console.log("Final Product DTO:", productDTO);
       const product = await createProduct(productDTO);
       console.log(product);
       toast.success("Product mapped successfully!");
     } catch (err) {
       console.log(err);
-      toast.error('failed to create the product');
+      toast.error("failed to create the product");
     } finally {
       setIsSaving(false);
     }
@@ -196,7 +196,11 @@ export default function ProductPage({ mode, productId }: ProductPageProps) {
           </div>
         </div>
         <div className="flex gap-3">
-          <Button disabled={isSaving} onClick={() => handleSave()} className="gap-2">
+          <Button
+            disabled={isSaving}
+            onClick={() => handleSave()}
+            className="gap-2"
+          >
             <Eye className="h-4 w-4" />
             Publish
           </Button>
@@ -437,7 +441,9 @@ export default function ProductPage({ mode, productId }: ProductPageProps) {
               <div className="grid gap-3">
                 {images.map((img, i) => (
                   <div key={i} className="relative">
-                    <img
+                    <Image
+                      width={50}
+                      height={60}
                       src={img}
                       alt={`Product ${i + 1}`}
                       className="w-full h-32 object-cover rounded border"

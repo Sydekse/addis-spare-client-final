@@ -26,54 +26,19 @@ import {
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  Bell,
-  Send,
-  Mail,
-  MessageSquare,
-  Clock,
-  CheckCircle,
-  Eye,
-  AlertTriangle,
-} from "lucide-react";
+import { Bell, Send, Mail, MessageSquare, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { getNotifications } from "@/lib/api/services/notifications.service";
-
-// Enums and interfaces
-export enum NotificationStatus {
-  PENDING = "PENDING",
-  FAILED = "FAILED",
-  SENT = "SENT",
-}
-
-export enum NotificationChannel {
-  SMS = "SMS",
-  GMAIL = "GMAIL",
-  IN_APP = "IN-APP",
-}
-
-export interface NotificationRelatedTo {
-  entity: string;
-  id: string;
-}
-
-export interface Notification {
-  id: string;
-  userId: string;
-  channel: NotificationChannel;
-  subject: string;
-  message: string;
-  relatedTo?: NotificationRelatedTo;
-  status: NotificationStatus;
-  createdAt: Date;
-  sentAt?: Date;
-}
+import {
+  Notification,
+  NotificationChannel,
+  NotificationStatus,
+} from "@/types/notification";
 
 // Component
 export default function NotificationManager() {
@@ -141,13 +106,13 @@ export default function NotificationManager() {
 
   const handleCreateNotification = () => {
     const notification: Notification = {
-      id: '',
+      id: "",
       createdAt: new Date(),
       ...newNotification,
     };
     setNotifications([notification, ...notifications]);
     setNewNotification({
-      userId: '',
+      userId: "",
       channel: NotificationChannel.GMAIL,
       subject: "",
       message: "",

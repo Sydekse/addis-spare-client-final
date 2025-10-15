@@ -1,10 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import Link from "next/link";
-import { Search, ShoppingCart, User, Menu, Heart, Bell } from "lucide-react";
+import { ShoppingCart, User, Menu, Bell } from "lucide-react";
 import { Button } from "../ui/button";
-import { Input } from "../ui/input";
 import { Badge } from "../ui/badge";
 import { useCart } from "@/context/use-cart";
 import { useAuth } from "@/hooks/use-auth";
@@ -17,27 +16,12 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
-
-interface HeaderProps {
-  onSearchSubmit: (query: string) => void;
-  onNavigate?: (page: string) => void; // optional if using Next.js links
-}
 
 export function Header() {
-  const [searchQuery, setSearchQuery] = useState("");
   const { user, logout } = useAuth();
   const { getTotalItems } = useCart();
 
   const router = useRouter();
-  const onSearchSubmit = (text: string) => {};
-
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      onSearchSubmit(searchQuery.trim());
-    }
-  };
 
   const onNavigate = (page: string) => {
     router.push(page);
@@ -81,7 +65,10 @@ export function Header() {
           <div className="flex items-center space-x-2">
             {user && (
               <>
-                <Link href="/account?tab=messages" className="relative hidden md:flex">
+                <Link
+                  href="/account?tab=messages"
+                  className="relative hidden md:flex"
+                >
                   <Button variant="ghost" size="sm">
                     <Bell className="h-5 w-5" />
                   </Button>

@@ -1,15 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -36,7 +29,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import {
-  Search,
   MessageSquare,
   Clock,
   CheckCircle,
@@ -67,7 +59,76 @@ type Ticket = {
   conversationId: string;
 };
 
-type ConversationMessage = {
+// Mock support ticket data
+const mockTickets: Ticket[] = [
+  {
+    _id: "TICKET-001",
+    userId: "673c1f123456789abcdef001",
+    userName: "Tekle Haile",
+    userEmail: "tekle.haile@gmail.com",
+    subject: "Cannot find brake pads for Toyota Corolla 2018",
+    message:
+      "I'm looking for brake pads compatible with my Toyota Corolla 2018 model but the search isn't showing relevant results. Can you help me find the right parts?",
+    status: "open",
+    priority: "medium",
+    category: "product_inquiry",
+    createdAt: "2024-11-19T09:15:00Z",
+    lastUpdated: "2024-11-19T09:15:00Z",
+    assignedTo: null,
+    conversationId: "CONV-001",
+  },
+  {
+    _id: "TICKET-002",
+    userId: "673c1f123456789abcdef003",
+    userName: "Sarah Mohammed",
+    userEmail: "sarah.mohammed@yahoo.com",
+    subject: "Order #ORD-12345 was cancelled without explanation",
+    message:
+      "My order for oil filters was cancelled yesterday but I didn't receive any explanation. The payment was already processed. Please help resolve this issue.",
+    status: "in_progress",
+    priority: "high",
+    category: "order_issue",
+    createdAt: "2024-11-18T14:30:00Z",
+    lastUpdated: "2024-11-19T08:45:00Z",
+    assignedTo: "Support Agent 1",
+    conversationId: "CONV-002",
+  },
+  {
+    _id: "TICKET-003",
+    userId: "673c1f123456789abcdef002",
+    userName: "Hanan Auto Parts Ltd",
+    userEmail: "info@hananautoparts.com",
+    subject: "Need help updating product inventory",
+    message:
+      "We're having trouble updating our inventory quantities through the supplier portal. The system keeps showing an error when we try to update stock levels.",
+    status: "resolved",
+    priority: "low",
+    category: "technical_support",
+    createdAt: "2024-11-17T11:20:00Z",
+    lastUpdated: "2024-11-18T16:10:00Z",
+    assignedTo: "Support Agent 2",
+    conversationId: "CONV-003",
+  },
+  {
+    _id: "TICKET-004",
+    userId: "673c1f123456789abcdef001",
+    userName: "Tekle Haile",
+    userEmail: "tekle.haile@gmail.com",
+    subject: "Received wrong spare parts in my order",
+    message:
+      "I ordered air filters for Honda Civic but received brake discs instead. Order number is ORD-12346. Please arrange for return and refund.",
+    status: "open",
+    priority: "high",
+    category: "order_issue",
+    createdAt: "2024-11-19T16:45:00Z",
+    lastUpdated: "2024-11-19T16:45:00Z",
+    assignedTo: null,
+    conversationId: "CONV-004",
+  },
+];
+
+// Mock conversation messages
+type ConversationMsg = {
   _id: string;
   senderId: string;
   senderName: string;
@@ -76,106 +137,44 @@ type ConversationMessage = {
   isSupport: boolean;
 };
 
-// Mock support ticket data
-const mockTickets = [
-  {
-    _id: "TICKET-001",
-    userId: "673c1f123456789abcdef001",
-    userName: "Tekle Haile",
-    userEmail: "tekle.haile@gmail.com", 
-    subject: "Cannot find brake pads for Toyota Corolla 2018",
-    message: "I'm looking for brake pads compatible with my Toyota Corolla 2018 model but the search isn't showing relevant results. Can you help me find the right parts?",
-    status: "open",
-    priority: "medium",
-    category: "product_inquiry",
-    createdAt: "2024-11-19T09:15:00Z",
-    lastUpdated: "2024-11-19T09:15:00Z",
-    assignedTo: null,
-    conversationId: "CONV-001"
-  },
-  {
-    _id: "TICKET-002", 
-    userId: "673c1f123456789abcdef003",
-    userName: "Sarah Mohammed",
-    userEmail: "sarah.mohammed@yahoo.com",
-    subject: "Order #ORD-12345 was cancelled without explanation",
-    message: "My order for oil filters was cancelled yesterday but I didn't receive any explanation. The payment was already processed. Please help resolve this issue.",
-    status: "in_progress",
-    priority: "high",
-    category: "order_issue",
-    createdAt: "2024-11-18T14:30:00Z",
-    lastUpdated: "2024-11-19T08:45:00Z", 
-    assignedTo: "Support Agent 1",
-    conversationId: "CONV-002"
-  },
-  {
-    _id: "TICKET-003",
-    userId: "673c1f123456789abcdef002",
-    userName: "Hanan Auto Parts Ltd",
-    userEmail: "info@hananautoparts.com",
-    subject: "Need help updating product inventory",
-    message: "We're having trouble updating our inventory quantities through the supplier portal. The system keeps showing an error when we try to update stock levels.",
-    status: "resolved",
-    priority: "low", 
-    category: "technical_support",
-    createdAt: "2024-11-17T11:20:00Z",
-    lastUpdated: "2024-11-18T16:10:00Z",
-    assignedTo: "Support Agent 2",
-    conversationId: "CONV-003"
-  },
-  {
-    _id: "TICKET-004",
-    userId: "673c1f123456789abcdef001", 
-    userName: "Tekle Haile",
-    userEmail: "tekle.haile@gmail.com",
-    subject: "Received wrong spare parts in my order",
-    message: "I ordered air filters for Honda Civic but received brake discs instead. Order number is ORD-12346. Please arrange for return and refund.",
-    status: "open",
-    priority: "high",
-    category: "order_issue", 
-    createdAt: "2024-11-19T16:45:00Z",
-    lastUpdated: "2024-11-19T16:45:00Z",
-    assignedTo: null,
-    conversationId: "CONV-004"
-  }
-];
-
-// Mock conversation messages
-const mockConversations = {
+const mockConversations: Record<string, ConversationMsg[]> = {
   "CONV-002": [
     {
       _id: "MSG-001",
       senderId: "673c1f123456789abcdef003",
       senderName: "Sarah Mohammed",
-      message: "My order for oil filters was cancelled yesterday but I didn't receive any explanation. The payment was already processed. Please help resolve this issue.",
+      message:
+        "My order for oil filters was cancelled yesterday but I didn't receive any explanation. The payment was already processed. Please help resolve this issue.",
       sentAt: "2024-11-18T14:30:00Z",
-      isSupport: false
+      isSupport: false,
     },
     {
-      _id: "MSG-002", 
+      _id: "MSG-002",
       senderId: "SUPPORT-001",
       senderName: "Support Agent 1",
-      message: "Hi Sarah, I apologize for the inconvenience. I've located your order #ORD-12345 and can see that it was cancelled due to insufficient stock. Your payment will be refunded within 3-5 business days. Would you like me to help you find alternative oil filters that are currently in stock?",
+      message:
+        "Hi Sarah, I apologize for the inconvenience. I've located your order #ORD-12345 and can see that it was cancelled due to insufficient stock. Your payment will be refunded within 3-5 business days. Would you like me to help you find alternative oil filters that are currently in stock?",
       sentAt: "2024-11-18T15:20:00Z",
-      isSupport: true
+      isSupport: true,
     },
     {
       _id: "MSG-003",
-      senderId: "673c1f123456789abcdef003", 
+      senderId: "673c1f123456789abcdef003",
       senderName: "Sarah Mohammed",
-      message: "Thank you for the explanation. Yes, please help me find alternative oil filters for my Honda Accord 2019.",
+      message:
+        "Thank you for the explanation. Yes, please help me find alternative oil filters for my Honda Accord 2019.",
       sentAt: "2024-11-19T08:45:00Z",
-      isSupport: false
-    }
-  ]
+      isSupport: false,
+    },
+  ],
 };
 
 // ----------------- Page Component -----------------
 export default function Page() {
   const [tickets, setTickets] = useState<Ticket[]>(mockTickets);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [priorityFilter, setPriorityFilter] = useState("all");
+  const [searchTerm] = useState("");
+  const [statusFilter] = useState("all");
+  const [priorityFilter] = useState("all");
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [replyMessage, setReplyMessage] = useState("");
 
@@ -193,10 +192,7 @@ export default function Page() {
     return matchesSearch && matchesStatus && matchesPriority;
   });
 
-  const handleStatusChange = (
-    ticketId: string,
-    newStatus
-  ) => {
+  const handleStatusChange = (ticketId: string, newStatus: string) => {
     setTickets((prev) =>
       prev.map((ticket) =>
         ticket._id === ticketId
@@ -480,7 +476,7 @@ export default function Page() {
                               {/* Additional conversation messages */}
                               {mockConversations[selectedTicket.conversationId]
                                 ?.slice(1)
-                                .map((msg) => (
+                                .map((msg: ConversationMsg) => (
                                   <div
                                     key={msg._id}
                                     className={`flex gap-3 ${msg.isSupport ? "flex-row-reverse" : ""}`}

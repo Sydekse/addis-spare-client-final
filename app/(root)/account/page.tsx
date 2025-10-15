@@ -133,27 +133,6 @@ export default function AccountPage() {
   //   const userOrders = [];
   //   const wishlistItems = [];
 
-  const messages = [
-    {
-      id: "1",
-      from: "Auto Parts Supplier",
-      subject: "Your order has been shipped",
-      message:
-        "Your order #12345 has been shipped and will arrive within 2-3 business days.",
-      date: new Date(),
-      read: false,
-    },
-    {
-      id: "2",
-      from: "Customer Support",
-      subject: "Welcome to Addis Spare Parts",
-      message:
-        "Thank you for joining our marketplace. We are here to help you find the best auto parts.",
-      date: new Date(Date.now() - 86400000),
-      read: true,
-    },
-  ];
-
   const returnRequests = [
     {
       id: "1",
@@ -165,7 +144,6 @@ export default function AccountPage() {
     },
   ];
 
-  const [open, setOpen] = useState(false);
   // const [selectedMessage ] = useState(messages[0]);
 
   const [orderOpen, setOrderOpen] = useState(false);

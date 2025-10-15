@@ -37,7 +37,6 @@ import {
   Search,
   MoreHorizontal,
   Eye,
-  Edit,
   Trash2,
   Package,
   AlertTriangle,
@@ -62,10 +61,10 @@ export default function ProductManagement() {
     const fetchProducts = async () => {
       const products = await getProducts();
       setProducts(products);
-    }
+    };
 
     fetchProducts();
-  }, [])
+  }, []);
 
   const filteredProducts = products.filter((product) => {
     const matchesSearch =
@@ -74,8 +73,7 @@ export default function ProductManagement() {
       product.brand.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory =
       categoryFilter === "all" || product.category === categoryFilter;
-    const matchesStatus =
-      statusFilter === "all" || product.id === statusFilter;
+    const matchesStatus = statusFilter === "all" || product.id === statusFilter;
     return matchesSearch && matchesCategory && matchesStatus;
   });
 
@@ -94,7 +92,11 @@ export default function ProductManagement() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "active":
-        return <Badge variant="outline" className="text-green-600">Active</Badge>;
+        return (
+          <Badge variant="outline" className="text-green-600">
+            Active
+          </Badge>
+        );
       case "pending":
         return <Badge variant="secondary">Pending Review</Badge>;
       case "suspended":
@@ -120,7 +122,9 @@ export default function ProductManagement() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Products</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Total Products
+            </CardTitle>
             <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -129,7 +133,9 @@ export default function ProductManagement() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Products</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Active Products
+            </CardTitle>
             <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -140,7 +146,9 @@ export default function ProductManagement() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending Review</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Pending Review
+            </CardTitle>
             <AlertTriangle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -189,8 +197,12 @@ export default function ProductManagement() {
                 <SelectItem value="all">All Categories</SelectItem>
                 <SelectItem value="Brake Systems">Brake Systems</SelectItem>
                 <SelectItem value="Engine Parts">Engine Parts</SelectItem>
-                <SelectItem value="Suspension Systems">Suspension Systems</SelectItem>
-                <SelectItem value="Electrical Components">Electrical Components</SelectItem>
+                <SelectItem value="Suspension Systems">
+                  Suspension Systems
+                </SelectItem>
+                <SelectItem value="Electrical Components">
+                  Electrical Components
+                </SelectItem>
               </SelectContent>
             </Select>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
@@ -236,10 +248,14 @@ export default function ProductManagement() {
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell className="font-mono text-sm">{product.sku}</TableCell>
+                    <TableCell className="font-mono text-sm">
+                      {product.sku}
+                    </TableCell>
                     <TableCell>{product.category}</TableCell>
                     <TableCell>ETB {product.price}</TableCell>
-                    <TableCell>{getStatusBadge(product.status || "active")}</TableCell>
+                    <TableCell>
+                      {getStatusBadge(product.status || "active")}
+                    </TableCell>
                     <TableCell>
                       {new Date(product.createdAt).toLocaleDateString()}
                     </TableCell>
@@ -251,20 +267,26 @@ export default function ProductManagement() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => setSelectedProduct(product)}>
+                          <DropdownMenuItem
+                            onClick={() => setSelectedProduct(product)}
+                          >
                             <Eye className="mr-2 h-4 w-4" />
                             View Details
                           </DropdownMenuItem>
                           {product.status === "suspended" ? (
                             <DropdownMenuItem
-                              onClick={() => handleStatusChange(product.id, "active")}
+                              onClick={() =>
+                                handleStatusChange(product.id, "active")
+                              }
                               className="text-green-600"
                             >
                               Activate
                             </DropdownMenuItem>
                           ) : (
                             <DropdownMenuItem
-                              onClick={() => handleStatusChange(product.id, "suspended")}
+                              onClick={() =>
+                                handleStatusChange(product.id, "suspended")
+                              }
                               className="text-yellow-600"
                             >
                               Suspend
@@ -296,7 +318,10 @@ export default function ProductManagement() {
 
       {/* Product Details Dialog */}
       {selectedProduct && (
-        <Dialog open={!!selectedProduct} onOpenChange={() => setSelectedProduct(null)}>
+        <Dialog
+          open={!!selectedProduct}
+          onOpenChange={() => setSelectedProduct(null)}
+        >
           <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>Product Details</DialogTitle>
@@ -308,7 +333,9 @@ export default function ProductManagement() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium">Product Name</label>
-                  <p className="text-sm text-muted-foreground">{selectedProduct.name}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {selectedProduct.name}
+                  </p>
                 </div>
                 <div>
                   <label className="text-sm font-medium">SKU</label>
@@ -318,11 +345,15 @@ export default function ProductManagement() {
                 </div>
                 <div>
                   <label className="text-sm font-medium">Brand</label>
-                  <p className="text-sm text-muted-foreground">{selectedProduct.brand}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {selectedProduct.brand}
+                  </p>
                 </div>
                 <div>
                   <label className="text-sm font-medium">Category</label>
-                  <p className="text-sm text-muted-foreground">{selectedProduct.category}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {selectedProduct.category}
+                  </p>
                 </div>
                 <div>
                   <label className="text-sm font-medium">Price</label>
@@ -332,7 +363,9 @@ export default function ProductManagement() {
                 </div>
                 <div>
                   <label className="text-sm font-medium">Status</label>
-                  <div className="mt-1">{getStatusBadge(selectedProduct.status || "active")}</div>
+                  <div className="mt-1">
+                    {getStatusBadge(selectedProduct.status || "active")}
+                  </div>
                 </div>
               </div>
               <div>
@@ -342,7 +375,9 @@ export default function ProductManagement() {
                 </p>
               </div>
               <div>
-                <label className="text-sm font-medium">Vehicle Compatibility</label>
+                <label className="text-sm font-medium">
+                  Vehicle Compatibility
+                </label>
                 <div className="space-y-2 mt-2">
                   {selectedProduct.compatibility.map((comp, index) => (
                     <div key={index} className="text-sm text-muted-foreground">

@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Star } from "lucide-react";
 import { toast } from "sonner";
+import axios from "axios";
 import { useAuth } from "@/hooks/use-auth";
 import { createReview } from "@/lib/api/services/review.service";
 import { createRating } from "@/lib/api/services/ratings.service";
@@ -41,13 +42,20 @@ export default function RatingReview({ product }: RatingReviewProps) {
     }
 
     try {
-      const rating =  await createRating({ productId: product.id, score });
+      const rating = await createRating({ productId: product.id, score });
       console.log(`rating is created: `, rating);
       toast.success("Rating submitted successfully");
       setRatingDialogOpen(false);
       setScore(0);
-    } catch (err: any) {
-      toast.error(err?.response?.data.message || "unable to create a rating");
+    } catch (err: unknown) {
+      let errMessage: string | undefined;
+      if (axios.isAxiosError(err) && err.response && err.response.data) {
+        errMessage = err.response.data?.message;
+      } else if (err instanceof Error) {
+        errMessage = err.message;
+      }
+
+      toast.error(errMessage || "unable to create a rating");
     }
   };
 
@@ -63,14 +71,24 @@ export default function RatingReview({ product }: RatingReviewProps) {
     }
 
     try {
-      const review = await createReview({ productId: product.id, userId: user.id, body: reviewBody });
-      console.log(`review has been created: `, review)
+      const review = await createReview({
+        productId: product.id,
+        userId: user.id,
+        body: reviewBody,
+      });
+      console.log(`review has been created: `, review);
       toast.success("Review submitted successfully");
       setReviewDialogOpen(false);
       setReviewBody("");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      toast.error(err?.response?.data.message || "unable to create a review");
+      const errMessage = axios.isAxiosError(err)
+        ? err?.response?.data?.message
+        : err instanceof Error
+          ? err.message
+          : undefined;
+
+      toast.error(errMessage || "unable to create a review");
     }
   };
 
@@ -90,14 +108,19 @@ export default function RatingReview({ product }: RatingReviewProps) {
               <Star
                 key={star}
                 className={`h-8 w-8 cursor-pointer ${
-                  star <= score ? "text-yellow-400 fill-current" : "text-gray-300"
+                  star <= score
+                    ? "text-yellow-400 fill-current"
+                    : "text-gray-300"
                 }`}
                 onClick={() => setScore(star)}
               />
             ))}
           </div>
           <div className="flex justify-end space-x-2 mt-4">
-            <Button variant="outline" onClick={() => setRatingDialogOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setRatingDialogOpen(false)}
+            >
               Cancel
             </Button>
             <Button onClick={handleCreateRating}>Submit Rating</Button>
@@ -121,7 +144,10 @@ export default function RatingReview({ product }: RatingReviewProps) {
             rows={6}
           />
           <div className="flex justify-end space-x-2 mt-4">
-            <Button variant="outline" onClick={() => setReviewDialogOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setReviewDialogOpen(false)}
+            >
               Cancel
             </Button>
             <Button onClick={handleCreateReview}>Submit Review</Button>

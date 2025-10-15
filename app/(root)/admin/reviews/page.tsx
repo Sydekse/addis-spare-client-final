@@ -1,21 +1,42 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useEffect, useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Search, Star, CheckCircle, X, Eye, AlertTriangle, MessageSquare } from 'lucide-react';
-import { User } from '@/types/user';
-import { Product } from '@/types/product';
-import { getReviews } from '@/lib/api/services/review.service';
-import { Review } from '@/types/review';
-import { getProductById } from '@/lib/api/services/product.service';
-import { findUserById } from '@/lib/api/services/user.service';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Search, Star, Eye, AlertTriangle, MessageSquare } from "lucide-react";
+import { getReviews } from "@/lib/api/services/review.service";
+import { Review } from "@/types/review";
+import { getProductById } from "@/lib/api/services/product.service";
+import { findUserById } from "@/lib/api/services/user.service";
 
 export default function ReviewModeration() {
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -34,61 +55,70 @@ export default function ReviewModeration() {
         const rev = {
           ...review,
           user,
-          product
-        }
+          product,
+        };
         finReviews.push(rev);
       }
-      console.log(`fin reviews are: `, finReviews)
+      console.log(`fin reviews are: `, finReviews);
       setReviews(finReviews);
-    }
-    fetchReviews()
-  }, [])
+    };
+    fetchReviews();
+  }, []);
 
   const filteredReviews = reviews.filter((review: Review) => {
-    const matchesSearch = (review.product?.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          review.user?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          review.body.slice(0, 10).toLowerCase().includes(searchTerm.toLowerCase()));
+    const matchesSearch =
+      review.product?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      review.user?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      review.body.slice(0, 10).toLowerCase().includes(searchTerm.toLowerCase());
     return matchesSearch;
   });
 
-  const handleApproveReview = (reviewId: string) => {
-    setReviews(reviews.map(review =>
-      review.id === reviewId ? { ...review, status: 'approved' } : review
-    ));
-  };
+  // const handleApproveReview = (reviewId: string) => {
+  //   setReviews(
+  //     reviews.map((review) =>
+  //       review.id === reviewId ? { ...review, status: "approved" } : review
+  //     )
+  //   );
+  // };
 
-  const handleRejectReview = (reviewId: string) => {
-    setReviews(reviews.filter(review => review.id !== reviewId));
-  };
+  // const handleRejectReview = (reviewId: string) => {
+  //   setReviews(reviews.filter((review) => review.id !== reviewId));
+  // };
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'approved':
-        return <Badge variant="outline" className="text-green-600">Approved</Badge>;
-      case 'pending':
-        return <Badge variant="secondary">Pending Review</Badge>;
-      case 'rejected':
-        return <Badge variant="destructive">Rejected</Badge>;
-      default:
-        return <Badge variant="outline">{status}</Badge>;
-    }
-  };
+  // const getStatusBadge = (status: string) => {
+  //   switch (status) {
+  //     case "approved":
+  //       return (
+  //         <Badge variant="outline" className="text-green-600">
+  //           Approved
+  //         </Badge>
+  //       );
+  //     case "pending":
+  //       return <Badge variant="secondary">Pending Review</Badge>;
+  //     case "rejected":
+  //       return <Badge variant="destructive">Rejected</Badge>;
+  //     default:
+  //       return <Badge variant="outline">{status}</Badge>;
+  //   }
+  // };
 
-  const renderStars = (rating: number) => {
-    return Array.from({ length: 5 }, (_, i) => (
-      <Star
-        key={i}
-        className={`h-4 w-4 ${i < rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
-      />
-    ));
-  };
+  // const renderStars = (rating: number) => {
+  //   return Array.from({ length: 5 }, (_, i) => (
+  //     <Star
+  //       key={i}
+  //       className={`h-4 w-4 ${i < rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}`}
+  //     />
+  //   ));
+  // };
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
           <h1>Review Moderation</h1>
-          <p className="text-muted-foreground">Manage user reviews and ratings to maintain content quality</p>
+          <p className="text-muted-foreground">
+            Manage user reviews and ratings to maintain content quality
+          </p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline">Export Reviews</Button>
@@ -109,7 +139,9 @@ export default function ReviewModeration() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending Review</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Pending Review
+            </CardTitle>
             <AlertTriangle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -118,7 +150,9 @@ export default function ReviewModeration() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Reported Content</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Reported Content
+            </CardTitle>
             <AlertTriangle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -127,13 +161,13 @@ export default function ReviewModeration() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Average Rating</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Average Rating
+            </CardTitle>
             <Star className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              4.5
-            </div>
+            <div className="text-2xl font-bold">4.5</div>
           </CardContent>
         </Card>
       </div>
@@ -197,28 +231,36 @@ export default function ReviewModeration() {
               </TableHeader>
               <TableBody>
                 {filteredReviews.map((review) => (
-                  <TableRow key={review.id} >
+                  <TableRow key={review.id}>
                     <TableCell className="max-w-xs">
                       <div>
-                        <div className="font-medium truncate">{review.body.substring(0, 10)}</div>
+                        <div className="font-medium truncate">
+                          {review.body.substring(0, 10)}
+                        </div>
                         <div className="text-sm text-muted-foreground truncate">
                           {review.body.substring(0, 80)}...
-                        </div>                      
+                        </div>
                       </div>
                     </TableCell>
                     <TableCell>
                       <div>
-                        <div className="font-medium">{review.product?.name}</div>
-                        <div className="text-sm text-muted-foreground font-mono">{review.product?.sku}</div>
+                        <div className="font-medium">
+                          {review.product?.name}
+                        </div>
+                        <div className="text-sm text-muted-foreground font-mono">
+                          {review.product?.sku}
+                        </div>
                       </div>
                     </TableCell>
                     <TableCell>
                       <div>
                         <div className="font-medium">{review.user?.name}</div>
-                        <div className="text-sm text-muted-foreground">{review.user?.email}</div>
+                        <div className="text-sm text-muted-foreground">
+                          {review.user?.email}
+                        </div>
                       </div>
                     </TableCell>
-                    
+
                     <TableCell>
                       {new Date(review.createdAt).toLocaleDateString()}
                     </TableCell>
@@ -284,7 +326,10 @@ export default function ReviewModeration() {
 
       {/* Review Details Dialog */}
       {selectedReview && (
-        <Dialog open={!!selectedReview} onOpenChange={() => setSelectedReview(null)}>
+        <Dialog
+          open={!!selectedReview}
+          onOpenChange={() => setSelectedReview(null)}
+        >
           <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>Review Details</DialogTitle>
@@ -297,11 +342,15 @@ export default function ReviewModeration() {
               <div className="space-y-4">
                 <div>
                   <label className="text-sm font-medium">Review Title</label>
-                  <p className="text-sm text-muted-foreground">{selectedReview.body.substring(0, 10)}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {selectedReview.body.substring(0, 10)}
+                  </p>
                 </div>
                 <div>
                   <label className="text-sm font-medium">Review Content</label>
-                  <p className="text-sm text-muted-foreground">{selectedReview.body}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {selectedReview.body}
+                  </p>
                 </div>
                 {/* <div className="grid grid-cols-2 gap-4">
                   {/* <div>
@@ -311,7 +360,7 @@ export default function ReviewModeration() {
                       <span className="ml-1">({selectedReview.rating}/5)</span>
                     </div>
                   </div> */}
-                  {/* <div>
+                {/* <div>
                     <label className="text-sm font-medium">Status</label>
                     <div className="mt-1">{getStatusBadge(selectedReview.status)}</div>
                   </div>  */}
@@ -324,11 +373,15 @@ export default function ReviewModeration() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="text-sm font-medium">Product Name</label>
-                    <p className="text-sm text-muted-foreground">{selectedReview.product?.name}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {selectedReview.product?.name}
+                    </p>
                   </div>
                   <div>
                     <label className="text-sm font-medium">SKU</label>
-                    <p className="text-sm text-muted-foreground font-mono">{selectedReview.product?.sku}</p>
+                    <p className="text-sm text-muted-foreground font-mono">
+                      {selectedReview.product?.sku}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -339,11 +392,15 @@ export default function ReviewModeration() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="text-sm font-medium">Customer Name</label>
-                    <p className="text-sm text-muted-foreground">{selectedReview.user?.name}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {selectedReview.user?.name}
+                    </p>
                   </div>
                   <div>
                     <label className="text-sm font-medium">Email</label>
-                    <p className="text-sm text-muted-foreground">{selectedReview.user?.email}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {selectedReview.user?.email}
+                    </p>
                   </div>
                   <div>
                     <label className="text-sm font-medium">Review Date</label>

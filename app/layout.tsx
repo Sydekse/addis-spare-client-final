@@ -1,11 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "../styles/globals.css";
-import { CartProvider } from "@/context/use-cart";
 import { Header } from "@/components/headers/Header";
-import { Provider } from "@radix-ui/react-tooltip";
 import { Providers } from "@/context/providers";
-import { Footer } from "@/components/layout/footer";
 import { Toaster } from "sonner";
 
 const geistSans = Geist({
@@ -34,12 +31,11 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
       >
         <div className="flex-grow">
-        <Providers>
-          <Toaster>
-          </Toaster>
-          <Header />
-          {children}
-        </Providers>
+          <Providers>
+            <Toaster></Toaster>
+            <Header />
+            {children}
+          </Providers>
         </div>
       </body>
     </html>

@@ -2,13 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -20,12 +14,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Search,
   Eye,
@@ -143,7 +132,7 @@ export default function OrdersPage() {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("all");
-  const [ orders, setOrders ] = useState<Order[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
 
   useEffect(() => {
     const findThings = async () => {
@@ -153,17 +142,17 @@ export default function OrdersPage() {
         const customer = await findUserById(ord.userId);
         const nord = {
           ...ord,
-          customer
-        }
-        ords.push(nord)
+          customer,
+        };
+        ords.push(nord);
       }
 
-      console.log(`the orders are: `, orders)
+      console.log(`the orders are: `, orders);
       setOrders(ords);
     };
 
-    findThings()
-  }, [])
+    findThings();
+  }, []);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -199,21 +188,19 @@ export default function OrdersPage() {
     }
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-IN", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
+  // Removed unused formatDate helper; places now use toLocaleString directly
 
   const getOrderStats = () => {
     const total = orders.length;
-    const pending = orders.filter((o) => o.status === OrderStatus.PENDING).length;
-    const shipped = orders.filter((o) => o.status === OrderStatus.SHIPPED).length;
-    const delivered = orders.filter((o) => o.status === OrderStatus.DELIVERED).length;
+    const pending = orders.filter(
+      (o) => o.status === OrderStatus.PENDING
+    ).length;
+    const shipped = orders.filter(
+      (o) => o.status === OrderStatus.SHIPPED
+    ).length;
+    const delivered = orders.filter(
+      (o) => o.status === OrderStatus.DELIVERED
+    ).length;
 
     return { total, pending, shipped, delivered };
   };
@@ -237,7 +224,9 @@ export default function OrdersPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Order Management</h1>
-          <p className="text-muted-foreground">Track and manage customer orders</p>
+          <p className="text-muted-foreground">
+            Track and manage customer orders
+          </p>
         </div>
         <div className="flex gap-3">
           <Button variant="outline" className="gap-2">
@@ -316,7 +305,11 @@ export default function OrdersPage() {
       {/* Orders Table */}
       <Card>
         <CardHeader>
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <Tabs
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="w-full"
+          >
             <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="all">All Orders</TabsTrigger>
               <TabsTrigger value="pending">Pending</TabsTrigger>
@@ -344,19 +337,26 @@ export default function OrdersPage() {
                 const StatusIcon = getStatusIcon(order.status);
                 return (
                   <TableRow key={order.id}>
-                    <TableCell className="font-mono font-medium">{order.id}</TableCell>
+                    <TableCell className="font-mono font-medium">
+                      {order.id}
+                    </TableCell>
                     <TableCell>
                       <div>
                         <p className="font-medium">{order.customer?.name}</p>
-                        <p className="text-sm text-muted-foreground">{order.customer?.email}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {order.customer?.email}
+                        </p>
                       </div>
                     </TableCell>
                     <TableCell>
                       <div>
-                        <p className="font-medium">{order.items.length} item(s)</p>
+                        <p className="font-medium">
+                          {order.items.length} item(s)
+                        </p>
                         <p className="text-sm text-muted-foreground">
                           {order.items[0].name}
-                          {order.items.length > 1 && ` +${order.items.length - 1} more`}
+                          {order.items.length > 1 &&
+                            ` +${order.items.length - 1} more`}
                         </p>
                       </div>
                     </TableCell>
@@ -372,13 +372,15 @@ export default function OrdersPage() {
                       </div>
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
-                      { order.placedAt.toLocaleString() }
+                      {order.placedAt.toLocaleString()}
                     </TableCell>
                     <TableCell>
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => router.push(`/supplier/orders/${order.id}`)}
+                        onClick={() =>
+                          router.push(`/supplier/orders/${order.id}`)
+                        }
                         className="gap-2"
                       >
                         <Eye className="h-4 w-4" />

@@ -57,7 +57,7 @@ export default function UserProfile() {
       setUser(updatedUser);
       setIsEditing(false);
       toast.success("Profile updated successfully!");
-    } catch (error) {
+    } catch {
       toast.error("Failed to update profile");
     } finally {
       setIsLoading(false);
@@ -173,7 +173,10 @@ export default function UserProfile() {
               <Badge className={getRoleColor(user.role)} variant="secondary">
                 {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
               </Badge>
-              <Badge className={getStatusColor(user.status)} variant="secondary">
+              <Badge
+                className={getStatusColor(user.status)}
+                variant="secondary"
+              >
                 {user.status.charAt(0).toUpperCase() + user.status.slice(1)}
               </Badge>
             </div>

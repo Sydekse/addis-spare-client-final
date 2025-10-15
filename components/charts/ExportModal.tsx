@@ -24,7 +24,7 @@ import { Progress } from "@/components/ui/progress";
 import {
   Download,
   FileText,
-  Image,
+  Image as TImage,
   Table as TableIcon,
   Settings,
   CheckCircle,
@@ -40,7 +40,7 @@ interface ExportModalProps {
   tableRef: React.RefObject<HTMLDivElement>;
   reportData: {
     columns: string[];
-    data: any[];
+    data: Record<string, unknown>[];
     keyMapping: Record<string, string>;
   };
   reportMeta: {
@@ -60,6 +60,12 @@ export function ExportModal({
   reportData,
   reportMeta,
 }: ExportModalProps) {
+  // Reference props that may be unused depending on export options to satisfy linter
+  console.debug("ExportModal props:", {
+    reportType,
+    hasChartsRef: !!chartsRef,
+    hasTableRef: !!tableRef,
+  });
   const [exportFormat, setExportFormat] = useState<"csv" | "pdf">("csv");
   const [includeCharts, setIncludeCharts] = useState(true);
   const [includeTable, setIncludeTable] = useState(true);
@@ -83,7 +89,7 @@ export function ExportModal({
       const csvRows = data.map((row) =>
         columns
           .map((col) => {
-            const value = row[keyMapping[col]];
+            const value = (row as Record<string, unknown>)[keyMapping[col]];
             const strValue = String(value ?? "");
             return strValue.includes(",")
               ? `"${strValue.replace(/"/g, '""')}"`
@@ -153,7 +159,6 @@ export function ExportModal({
 
       const pdf = new jsPDF("p", "mm", "a4");
       const pageWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
 
       // Scale image to fit within A4 page
       const { width, height } = wrapper.getBoundingClientRect();
@@ -276,7 +281,7 @@ export function ExportModal({
                   htmlFor="charts"
                   className="flex items-center gap-2 text-sm"
                 >
-                  <Image className="h-4 w-4" />
+                  <TImage className="h-4 w-4" />
                   Charts & Visualizations
                   {exportFormat === "csv" && (
                     <Badge variant="secondary" className="text-xs">

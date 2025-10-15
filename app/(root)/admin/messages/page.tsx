@@ -58,7 +58,7 @@ export default function SupplierMessagesPage() {
       }
     };
     fetchConversations();
-  }, [user?.id]);
+  }, [user]);
 
   const formatTime = (date: string | Date) => {
     const d = new Date(date);

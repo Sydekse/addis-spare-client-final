@@ -1,12 +1,46 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { Calendar, Download, FileText, TrendingUp, Users, ShoppingCart, Package } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  PieLabelRenderProps,
+} from "recharts";
+import {
+  Calendar,
+  Download,
+  FileText,
+  TrendingUp,
+  Users,
+  ShoppingCart,
+  Package,
+} from "lucide-react";
 
 // Define interfaces for data
 interface SalesData {
@@ -17,6 +51,7 @@ interface SalesData {
 }
 
 interface CategoryData {
+  [key: string]: string | number;
   name: string;
   value: number;
   color: string;
@@ -45,61 +80,85 @@ interface ReportType {
 
 // Mock analytics data
 const salesData: SalesData[] = [
-  { month: 'Jan', revenue: 45000, orders: 120, customers: 85 },
-  { month: 'Feb', revenue: 52000, orders: 140, customers: 95 },
-  { month: 'Mar', revenue: 48000, orders: 130, customers: 88 },
-  { month: 'Apr', revenue: 61000, orders: 165, customers: 110 }, 
-  { month: 'May', revenue: 55000, orders: 150, customers: 102 },
-  { month: 'Jun', revenue: 67000, orders: 180, customers: 125 },
-  { month: 'Jul', revenue: 72000, orders: 195, customers: 135 },
-  { month: 'Aug', revenue: 68000, orders: 185, customers: 128 },
-  { month: 'Sep', revenue: 74000, orders: 200, customers: 142 },
-  { month: 'Oct', revenue: 79000, orders: 215, customers: 150 },
-  { month: 'Nov', revenue: 83000, orders: 225, customers: 158 }
+  { month: "Jan", revenue: 45000, orders: 120, customers: 85 },
+  { month: "Feb", revenue: 52000, orders: 140, customers: 95 },
+  { month: "Mar", revenue: 48000, orders: 130, customers: 88 },
+  { month: "Apr", revenue: 61000, orders: 165, customers: 110 },
+  { month: "May", revenue: 55000, orders: 150, customers: 102 },
+  { month: "Jun", revenue: 67000, orders: 180, customers: 125 },
+  { month: "Jul", revenue: 72000, orders: 195, customers: 135 },
+  { month: "Aug", revenue: 68000, orders: 185, customers: 128 },
+  { month: "Sep", revenue: 74000, orders: 200, customers: 142 },
+  { month: "Oct", revenue: 79000, orders: 215, customers: 150 },
+  { month: "Nov", revenue: 83000, orders: 225, customers: 158 },
 ];
 
 const categoryData: CategoryData[] = [
-  { name: 'Engine Parts', value: 35, color: '#8884d8', revenue: 45000 },
-  { name: 'Brake Systems', value: 25, color: '#82ca9d', revenue: 32000 },
-  { name: 'Suspension', value: 20, color: '#ffc658', revenue: 28000 },
-  { name: 'Electrical', value: 15, color: '#ff7300', revenue: 21000 },
-  { name: 'Others', value: 5, color: '#00ff00', revenue: 8000 }
+  { name: "Engine Parts", value: 35, color: "#8884d8", revenue: 45000 },
+  { name: "Brake Systems", value: 25, color: "#82ca9d", revenue: 32000 },
+  { name: "Suspension", value: 20, color: "#ffc658", revenue: 28000 },
+  { name: "Electrical", value: 15, color: "#ff7300", revenue: 21000 },
+  { name: "Others", value: 5, color: "#00ff00", revenue: 8000 },
 ];
 
 const inventoryData: InventoryData[] = [
-  { category: 'Engine Parts', inStock: 245, lowStock: 12, outOfStock: 3 },
-  { category: 'Brake Systems', inStock: 189, lowStock: 8, outOfStock: 1 },
-  { category: 'Suspension', inStock: 156, lowStock: 15, outOfStock: 2 },
-  { category: 'Electrical', inStock: 203, lowStock: 6, outOfStock: 4 },
-  { category: 'Transmission', inStock: 134, lowStock: 9, outOfStock: 1 }
+  { category: "Engine Parts", inStock: 245, lowStock: 12, outOfStock: 3 },
+  { category: "Brake Systems", inStock: 189, lowStock: 8, outOfStock: 1 },
+  { category: "Suspension", inStock: 156, lowStock: 15, outOfStock: 2 },
+  { category: "Electrical", inStock: 203, lowStock: 6, outOfStock: 4 },
+  { category: "Transmission", inStock: 134, lowStock: 9, outOfStock: 1 },
 ];
 
 const userActivityData: UserActivityData[] = [
-  { week: 'Week 1', newUsers: 12, activeUsers: 145, orders: 45 },
-  { week: 'Week 2', newUsers: 18, activeUsers: 156, orders: 52 },
-  { week: 'Week 3', newUsers: 15, activeUsers: 162, orders: 48 },
-  { week: 'Week 4', newUsers: 22, activeUsers: 178, orders: 61 }
+  { week: "Week 1", newUsers: 12, activeUsers: 145, orders: 45 },
+  { week: "Week 2", newUsers: 18, activeUsers: 156, orders: 52 },
+  { week: "Week 3", newUsers: 15, activeUsers: 162, orders: 48 },
+  { week: "Week 4", newUsers: 22, activeUsers: 178, orders: 61 },
 ];
 
 const reportTypes: ReportType[] = [
-  { id: 'sales', name: 'Sales Report', description: 'Revenue, orders, and customer analytics' },
-  { id: 'inventory', name: 'Inventory Report', description: 'Stock levels, low stock alerts, and turnover' },
-  { id: 'users', name: 'User Activity Report', description: 'User registrations, activity, and engagement' },
-  { id: 'suppliers', name: 'Supplier Performance', description: 'Supplier metrics and product performance' },
-  { id: 'financial', name: 'Financial Summary', description: 'Profit margins, costs, and financial health' }
+  {
+    id: "sales",
+    name: "Sales Report",
+    description: "Revenue, orders, and customer analytics",
+  },
+  {
+    id: "inventory",
+    name: "Inventory Report",
+    description: "Stock levels, low stock alerts, and turnover",
+  },
+  {
+    id: "users",
+    name: "User Activity Report",
+    description: "User registrations, activity, and engagement",
+  },
+  {
+    id: "suppliers",
+    name: "Supplier Performance",
+    description: "Supplier metrics and product performance",
+  },
+  {
+    id: "financial",
+    name: "Financial Summary",
+    description: "Profit margins, costs, and financial health",
+  },
 ];
 
 export default function ReportsAnalytics() {
-  const [selectedReportType, setSelectedReportType] = useState<string>('sales');
-  const [dateRange, setDateRange] = useState<string>('last30days');
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [selectedReportType, setSelectedReportType] = useState<string>("sales");
+  const [dateRange, setDateRange] = useState<string>("last30days");
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
 
   const generateReport = (type: string, format: string) => {
     // In a real app, this would make an API call to generate the report
-    console.log(`Generating ${type} report in ${format} format for ${dateRange}`);
+    console.log(
+      `Generating ${type} report in ${format} format for ${dateRange}`
+    );
     // Simulate download
-    const fileName = `${type}_report_${new Date().toISOString().split('T')[0]}.${format}`;
-    alert(`Report "${fileName}" is being generated and will be downloaded shortly.`);
+    const fileName = `${type}_report_${new Date().toISOString().split("T")[0]}.${format}`;
+    alert(
+      `Report "${fileName}" is being generated and will be downloaded shortly.`
+    );
   };
 
   return (
@@ -107,7 +166,9 @@ export default function ReportsAnalytics() {
       <div className="flex justify-between items-center">
         <div>
           <h1>Reports & Analytics</h1>
-          <p className="text-muted-foreground">Generate insights and export business intelligence reports</p>
+          <p className="text-muted-foreground">
+            Generate insights and export business intelligence reports
+          </p>
         </div>
         <div className="flex gap-2">
           <Select value={dateRange} onValueChange={setDateRange}>
@@ -158,7 +219,9 @@ export default function ReportsAnalytics() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Customers</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Active Customers
+            </CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -199,8 +262,18 @@ export default function ReportsAnalytics() {
                 <XAxis dataKey="month" />
                 <YAxis />
                 <Tooltip />
-                <Line type="monotone" dataKey="revenue" stroke="#8884d8" strokeWidth={2} />
-                <Line type="monotone" dataKey="orders" stroke="#82ca9d" strokeWidth={2} />
+                <Line
+                  type="monotone"
+                  dataKey="revenue"
+                  stroke="#8884d8"
+                  strokeWidth={2}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="orders"
+                  stroke="#82ca9d"
+                  strokeWidth={2}
+                />
               </LineChart>
             </ResponsiveContainer>
           </CardContent>
@@ -210,7 +283,9 @@ export default function ReportsAnalytics() {
         <Card>
           <CardHeader>
             <CardTitle>Sales by Category</CardTitle>
-            <CardDescription>Revenue distribution across product categories</CardDescription>
+            <CardDescription>
+              Revenue distribution across product categories
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
@@ -222,7 +297,9 @@ export default function ReportsAnalytics() {
                   outerRadius={80}
                   fill="#8884d8"
                   dataKey="value"
-                  label={({ name, value }: { name: string; value: number }) => `${name}: ${value}%`}
+                  label={(props: PieLabelRenderProps) => {
+                    return `${props.name}: ${props.value}%`;
+                  }}
                 >
                   {categoryData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
@@ -280,19 +357,24 @@ export default function ReportsAnalytics() {
       <Card>
         <CardHeader>
           <CardTitle>Generate Reports</CardTitle>
-          <CardDescription>Create and export detailed business reports</CardDescription>
+          <CardDescription>
+            Create and export detailed business reports
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-6">
             {/* Report Type Selection */}
             <div>
               <label className="text-sm font-medium">Select Report Type</label>
-              <Select value={selectedReportType} onValueChange={setSelectedReportType}>
+              <Select
+                value={selectedReportType}
+                onValueChange={setSelectedReportType}
+              >
                 <SelectTrigger className="w-full mt-2">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {reportTypes.map(type => (
+                  {reportTypes.map((type) => (
                     <SelectItem key={type.id} value={type.id}>
                       {type.name}
                     </SelectItem>
@@ -303,13 +385,19 @@ export default function ReportsAnalytics() {
 
             {/* Report Details */}
             <div className="p-4 bg-muted rounded-lg">
-              {reportTypes.find(type => type.id === selectedReportType) && (
+              {reportTypes.find((type) => type.id === selectedReportType) && (
                 <div>
                   <h4 className="font-medium">
-                    {reportTypes.find(type => type.id === selectedReportType)?.name}
+                    {
+                      reportTypes.find((type) => type.id === selectedReportType)
+                        ?.name
+                    }
                   </h4>
                   <p className="text-sm text-muted-foreground mt-1">
-                    {reportTypes.find(type => type.id === selectedReportType)?.description}
+                    {
+                      reportTypes.find((type) => type.id === selectedReportType)
+                        ?.description
+                    }
                   </p>
                 </div>
               )}
@@ -332,11 +420,15 @@ export default function ReportsAnalytics() {
                   </SelectContent>
                 </Select>
               </div>
-              
-              {(selectedReportType === 'sales' || selectedReportType === 'inventory') && (
+
+              {(selectedReportType === "sales" ||
+                selectedReportType === "inventory") && (
                 <div>
                   <label className="text-sm font-medium">Category Filter</label>
-                  <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                  <Select
+                    value={selectedCategory}
+                    onValueChange={setSelectedCategory}
+                  >
                     <SelectTrigger className="mt-2">
                       <SelectValue />
                     </SelectTrigger>
@@ -354,24 +446,24 @@ export default function ReportsAnalytics() {
 
             {/* Export Options */}
             <div className="flex gap-3 pt-4 border-t">
-              <Button 
-                onClick={() => generateReport(selectedReportType, 'pdf')}
+              <Button
+                onClick={() => generateReport(selectedReportType, "pdf")}
                 className="flex-1"
               >
                 <Download className="h-4 w-4 mr-2" />
                 Export as PDF
               </Button>
-              <Button 
-                variant="outline" 
-                onClick={() => generateReport(selectedReportType, 'csv')}
+              <Button
+                variant="outline"
+                onClick={() => generateReport(selectedReportType, "csv")}
                 className="flex-1"
               >
                 <FileText className="h-4 w-4 mr-2" />
                 Export as CSV
               </Button>
-              <Button 
-                variant="outline" 
-                onClick={() => generateReport(selectedReportType, 'xlsx')}
+              <Button
+                variant="outline"
+                onClick={() => generateReport(selectedReportType, "xlsx")}
                 className="flex-1"
               >
                 <FileText className="h-4 w-4 mr-2" />
@@ -386,17 +478,42 @@ export default function ReportsAnalytics() {
       <Card>
         <CardHeader>
           <CardTitle>Recent Reports</CardTitle>
-          <CardDescription>Previously generated reports and exports</CardDescription>
+          <CardDescription>
+            Previously generated reports and exports
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
             {[
-              { name: 'Sales Report - November 2024', type: 'PDF', date: '2024-11-19', size: '2.4 MB' },
-              { name: 'Inventory Status Report', type: 'CSV', date: '2024-11-18', size: '156 KB' },
-              { name: 'User Activity Analysis', type: 'Excel', date: '2024-11-17', size: '890 KB' },
-              { name: 'Supplier Performance Report', type: 'PDF', date: '2024-11-16', size: '1.8 MB' }
+              {
+                name: "Sales Report - November 2024",
+                type: "PDF",
+                date: "2024-11-19",
+                size: "2.4 MB",
+              },
+              {
+                name: "Inventory Status Report",
+                type: "CSV",
+                date: "2024-11-18",
+                size: "156 KB",
+              },
+              {
+                name: "User Activity Analysis",
+                type: "Excel",
+                date: "2024-11-17",
+                size: "890 KB",
+              },
+              {
+                name: "Supplier Performance Report",
+                type: "PDF",
+                date: "2024-11-16",
+                size: "1.8 MB",
+              },
             ].map((report, index) => (
-              <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+              <div
+                key={index}
+                className="flex items-center justify-between p-3 border rounded-lg"
+              >
                 <div className="flex items-center gap-3">
                   <FileText className="h-5 w-5 text-muted-foreground" />
                   <div>

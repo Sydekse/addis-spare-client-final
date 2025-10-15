@@ -92,12 +92,9 @@ export default function SignUpForm() {
       console.log("Signup successful:", response);
       toast.success("Successfully signed up");
       router.push("/sign-in");
-    } catch (error: any) {
-      if (error.response) {
-        const message = error.response.data?.message || "Registration failed.";
-        alert(message);
-      } else if (error.request) {
-        alert("Server did not respond. Please try again later.");
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        alert(error.message);
       } else {
         alert("An unexpected error occurred. Please try again.");
       }
@@ -168,8 +165,6 @@ export default function SignUpForm() {
           <SelectContent>
             <SelectItem value="customer">Customer</SelectItem>
             <SelectItem value="supplier">Supplier</SelectItem>
-            <SelectItem value="admin">Admin</SelectItem>
-            <SelectItem value="support">Support</SelectItem>
           </SelectContent>
         </Select>
       </div>

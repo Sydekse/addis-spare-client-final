@@ -1,13 +1,16 @@
-import { getProductById, getProducts } from "@/lib/api/services/product.service";
+import {
+  getProductById,
+  getProducts,
+} from "@/lib/api/services/product.service";
 import ProductDetailClient from "@/components/products/product-detail";
-import { getRatingById, getRatingsForProduct } from "@/lib/api/services/ratings.service";
-import { getReviews } from "@/lib/api/services/review.service";
 
-export default async function Page({ params }: { params: { id: string } }) {
-  const product = await getProductById(params.id);
+export default async function Page(props: {
+  params?: Promise<{ id: string }>;
+}) {
+  const params = await props.params;
+  const id = params?.id as string;
+  const product = await getProductById(id);
   const relatedProducts = await getProducts();
-  const productRatings: any[] = [];
-  const productReviews: any[] = [];
 
   return (
     <ProductDetailClient

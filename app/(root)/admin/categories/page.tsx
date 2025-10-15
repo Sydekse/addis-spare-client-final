@@ -291,7 +291,9 @@ function CategoryNode({
               <AlertDialogHeader>
                 <AlertDialogTitle>Delete Category</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Are you sure you want to delete "{category.name}"?
+                  Are you sure you want to delete {'"'}
+                  {category.name}
+                  {'"'}?
                   {hasChildren && " This will also delete all subcategories."}
                   {category.productCount > 0 &&
                     ` This category contains ${category.productCount} products.`}
@@ -398,8 +400,7 @@ export default function CategoryManagement() {
   const getTotalCategories = (): number => {
     const countCategories = (cats: Category[]): number =>
       cats.reduce(
-        (total, cat) =>
-          total + 1 + countCategories(cat.children ?? []),
+        (total, cat) => total + 1 + countCategories(cat.children ?? []),
         0
       );
     return countCategories(categories);
@@ -482,17 +483,23 @@ export default function CategoryManagement() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Main Categories</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Main Categories
+            </CardTitle>
             <Folder className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{categories.length}</div>
-            <p className="text-xs text-muted-foreground">Top-level categories</p>
+            <p className="text-xs text-muted-foreground">
+              Top-level categories
+            </p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Products</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Total Products
+            </CardTitle>
             <FolderTree className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -509,8 +516,8 @@ export default function CategoryManagement() {
         <CardHeader>
           <CardTitle>Category Hierarchy</CardTitle>
           <CardDescription>
-            Manage product categories and subcategories. Click the expand/collapse
-            icons to navigate the hierarchy.
+            Manage product categories and subcategories. Click the
+            expand/collapse icons to navigate the hierarchy.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -529,7 +536,9 @@ export default function CategoryManagement() {
             {categories.length === 0 && (
               <div className="text-center py-12 text-muted-foreground">
                 <FolderTree className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <h3 className="text-lg font-medium mb-2">No categories found</h3>
+                <h3 className="text-lg font-medium mb-2">
+                  No categories found
+                </h3>
                 <p>Start by creating your first product category.</p>
               </div>
             )}
@@ -564,7 +573,10 @@ export default function CategoryManagement() {
                 />
               </div>
               <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setSelectedCategory(null)}>
+                <Button
+                  variant="outline"
+                  onClick={() => setSelectedCategory(null)}
+                >
                   Cancel
                 </Button>
                 <Button
