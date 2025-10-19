@@ -169,8 +169,8 @@ export default function UserProfile() {
 
       <div className="grid grid-cols-1 gap-4 sm:gap-6">
         {/* Profile Overview Card */}
-        <Card className="grid grid-cols-2">
-          <CardHeader className="border-r flex flex-col items-center justify-center">
+        <Card className="grid md:grid-cols-2">
+          <CardHeader className="border-b md:border-r flex flex-col items-center justify-center">
             <CardTitle className="text-lg sm:text-xl">
               {formData.name}
             </CardTitle>
@@ -198,7 +198,7 @@ export default function UserProfile() {
               </Badge>
             </div>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-3 flex justify-center items-center flex-col">
             <div>
               <Label className="text-xs text-muted-foreground">
                 Member Since

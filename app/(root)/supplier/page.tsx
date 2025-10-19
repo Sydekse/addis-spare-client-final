@@ -146,20 +146,20 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
         <div>
-          <h1 className="text-3xl font-bold">Dashboard</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl font-bold sm:text-3xl">Dashboard</h1>
+          <p className="text-sm text-muted-foreground sm:text-base">
             Welcome back! Here is what is happening with your store.
           </p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3">
           {quickActions.map((action) => (
             <Button
               key={action.action}
               variant="outline"
               onClick={() => onNavigate(action.action)}
-              className="gap-2"
+              className="gap-2 text-sm sm:text-base"
             >
               <action.icon className="h-4 w-4" />
               {action.label}
@@ -169,7 +169,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {statsData.map((stat, index) => (
           <Card key={index}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -200,7 +200,7 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-6 md:grid-cols-2">
         {/* Recent Orders */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
@@ -224,7 +224,7 @@ export default function DashboardPage() {
               recentOrders.map((order) => (
                 <div
                   key={order.id}
-                  className="flex items-center justify-between p-3 rounded-lg border"
+                  className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:justify-between sm:space-y-0 p-3 rounded-lg border"
                 >
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
@@ -280,7 +280,7 @@ export default function DashboardPage() {
                 return (
                   <div
                     key={inventory.id}
-                    className="flex items-center justify-between p-3 rounded-lg border"
+                    className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:justify-between sm:space-y-0 p-3 rounded-lg border"
                   >
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
@@ -335,7 +335,7 @@ export default function DashboardPage() {
             recentProducts.map((product) => (
               <div
                 key={product.id}
-                className="flex items-center justify-between p-3 rounded-lg border"
+                className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:justify-between sm:space-y-0 p-3 rounded-lg border"
               >
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">

@@ -38,6 +38,9 @@ import { Rating } from "@/types/rating";
 import { getRatingsForProduct } from "@/lib/api/services/ratings.service";
 import { Review } from "@/types/review";
 import { getReviewsForProduct } from "@/lib/api/services/review.service";
+import { toast } from "sonner";
+import { CreateMessageDto, Message } from "@/types/messages";
+import { createMessage } from "@/lib/api/services/message.service";
 
 interface ProductDetailProps {
   product: Product;
@@ -110,15 +113,93 @@ export default function ProductDetail({
     addToCart(product.id, quantity);
   };
 
-  const handleContactSeller = () => {
+  const handleContactSeller = async () => {
     if (!user) {
-      router.push("/login");
+      toast.error("You must be logged in to contact the seller");
       return;
     }
-    console.log("Contact seller:", contactMessage);
-    setShowContactDialog(false);
-    setContactMessage("");
+
+    const receiverId = product.supplierId;
+    const senderId = user.id;
+
+    if (!contactMessage.trim()) {
+      toast.error("Please enter a message or attach a file");
+      return;
+    }
+
+    try {
+      // Prepare message payload
+      const messageDto: CreateMessageDto = {
+        conversationId: "",
+        senderId,
+        recipientId: receiverId,
+        body: contactMessage,
+        attachments: [],
+      };
+
+      console.log(messageDto);
+
+      const createdMessage: Message = await createMessage(messageDto);
+      console.log(`the sent message is: `, createdMessage);
+      toast.success("Message sent to seller");
+      setShowContactDialog(false);
+      setContactMessage("");
+    } catch (err) {
+      console.error("Failed to contact seller:", err);
+      toast.error("Failed to send message. Please try again.");
+    }
   };
+
+  // const handleContactSeller = () => {
+  //   if (!user) {
+  //     toast.error("You must be logged in to contact the seller");
+  //     return;
+  //   }
+
+  //   const recieverId = product.supplierId;
+  //   const senderId = user.id;
+  //   // Send message with attachments
+  //   // const handleSendMessage = async () => {
+  //   //   if (!selectedConversation || !user) return;
+  //   //   if (!newMessage.trim() && files.length === 0) return;
+
+  //   //   const recipientId = selectedConversation.user.id;
+
+  //   //   try {
+  //   //     // Upload files to Cloudinary
+  //   //     const uploadedUrls: string[] = [];
+  //   //     for (const file of files) {
+  //   //       const uploaded = await uploadRawFile(file);
+  //   //       console.log(uploaded);
+  //   //       if (uploaded.secure_url) uploadedUrls.push(uploaded.secure_url);
+  //   //     }
+
+  //   //     const messageDto: CreateMessageDto = {
+  //   //       conversationId: selectedConversation.messages[0]?.conversationId || "",
+  //   //       senderId: user.id,
+  //   //       recipientId,
+  //   //       body: newMessage,
+  //   //       attachments: uploadedUrls,
+  //   //     };
+
+  //   //     const createdMessage: Message = await createMessage(messageDto);
+
+  //   //     // Optimistically update UI
+  //   //     setSelectedConversation((prev) =>
+  //   //       prev ? { ...prev, messages: [...prev.messages, createdMessage] } : prev
+  //   //     );
+
+  //   //     setNewMessage("");
+  //   //     setFiles([]);
+  //   //   } catch (err) {
+  //   //     console.error("Failed to send message:", err);
+  //   //   }
+  //   // };
+
+  //   console.log("Contact seller:", contactMessage);
+  //   setShowContactDialog(false);
+  //   setContactMessage("");
+  // };
 
   return (
     <div className="container mx-auto px-4 py-6 sm:py-8">

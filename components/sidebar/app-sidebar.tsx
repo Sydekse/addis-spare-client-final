@@ -10,14 +10,12 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
-  SidebarFooter,
   SidebarHeader,
 } from "@/components/ui/sidebar";
 import {
   Home,
   User,
   Package,
-  LayoutGrid,
   ShoppingCart,
   Warehouse,
   BarChart,
@@ -31,7 +29,6 @@ import {
   BaggageClaim,
   Mail,
 } from "lucide-react";
-import { NavUser } from "./nav-user";
 
 interface MenuItem {
   title: string;
@@ -93,7 +90,7 @@ const adminMenuGroups: { label: string; items: MenuItem[] }[] = [
       { title: "Users", url: "/admin/users", icon: User },
       { title: "Suppliers", url: "/admin/suppliers", icon: Truck },
       { title: "Products", url: "/admin/products", icon: Package },
-      { title: "Categories", url: "/admin/categories", icon: LayoutGrid },
+      // { title: "Categories", url: "/admin/categories", icon: LayoutGrid },
     ],
   },
   {
@@ -121,12 +118,6 @@ const adminMenuGroups: { label: string; items: MenuItem[] }[] = [
     ],
   },
 ];
-
-const user = {
-  name: "Supplier Name",
-  email: "supplier@example.com",
-  avatar: "",
-};
 
 export function AdminSidebar() {
   const pathname = usePathname();
@@ -191,9 +182,9 @@ export function AdminSidebar() {
         ))}
       </SidebarContent>
 
-      <SidebarFooter>
+      {/* <SidebarFooter>
         <NavUser user={user} />
-      </SidebarFooter>
+      </SidebarFooter> */}
     </Sidebar>
   );
 }
@@ -259,10 +250,6 @@ export function SupplierSidebar() {
           </SidebarGroup>
         ))}
       </SidebarContent>
-
-      <SidebarFooter>
-        <NavUser user={user} />
-      </SidebarFooter>
     </Sidebar>
   );
 }

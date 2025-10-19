@@ -169,10 +169,8 @@ export default function AddProductPage() {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold">Add New Product</h1>
-            <p className="text-muted-foreground">
-              Create a new product listing for your inventory
-            </p>
+            <h1 className="text-xl font-bold">Add New Product</h1>
+            <p className="text-muted-foreground">Create a new product</p>
           </div>
         </div>
         <div className="flex gap-3">
@@ -240,7 +238,7 @@ export default function AddProductPage() {
                       setFormData({ ...formData, category: value })
                     }
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="w-full">
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
                     <SelectContent>

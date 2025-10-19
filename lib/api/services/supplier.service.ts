@@ -1,18 +1,22 @@
 import api from "../client";
 import type { SupplierDetails, User } from "@/types/user";
 
-export function getSuppliers() {
-  return api.get<User[]>("/users/suppliers");
+export async function getSuppliers() {
+  const response = await api.get<User[]>("/users/suppliers");
+  return response.data;
 }
 
-export function createSupplier(id: string, data: SupplierDetails) {
-  return api.post<User>(`/users/${id}/supplier-details`, data);
+export async function createSupplier(id: string, data: SupplierDetails) {
+  const response = await api.post<User>(`/users/${id}/supplier-details`, data);
+  return response.data;
 }
 
-export function verifySupplier(id: string) {
-  return api.post<User>(`/users/suppliers/${id}/verify`);
+export async function verifySupplier(id: string) {
+  const response = await api.put<User>(`/users/${id}/verify-supplier`);
+  return response.data;
 }
 
-export function updateSupplier(id: string, data: SupplierDetails) {
-  return api.put<User>(`/users/${id}/supplier-details`, data);
+export async function updateSupplier(id: string, data: SupplierDetails) {
+  const response = await api.put<User>(`/users/${id}/supplier-details`, data);
+  return response.data;
 }

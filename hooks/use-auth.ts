@@ -11,7 +11,10 @@ interface DecodedToken {
   [key: string]: any;
 }
 
-export function useAuth(redirectIfUnauthorized: boolean = false) {
+export function useAuth(
+  redirectIfUnauthorized: boolean = false,
+  role: string = "none"
+) {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -25,7 +28,7 @@ export function useAuth(redirectIfUnauthorized: boolean = false) {
       setUser(null);
       setLoading(false);
 
-      if (redirectIfUnauthorized) {
+      if (redirectIfUnauthorized || role !== "none") {
         router.push("/sign-in");
       }
       return;
@@ -41,17 +44,29 @@ export function useAuth(redirectIfUnauthorized: boolean = false) {
           router.push("/sign-in");
         }
       } else {
-        setIsAuthenticated(true);
-
         // Restore user from localStorage
         const storedUser = localStorage.getItem("user");
-        console.log(`The user that was stored is : `, storedUser)
+
+        let parsedUser: User | null = null;
         if (storedUser) {
-          setUser(JSON.parse(storedUser));
+          parsedUser = JSON.parse(storedUser) as User;
+          setUser(parsedUser);
+        } else {
+          // If no stored user but token exists, treat as invalid state
+          throw new Error("No stored user found");
         }
+
+        if (role !== "none") {
+          const userRole = parsedUser.role;
+          if (userRole !== role) {
+            router.push("/");
+          }
+        }
+
+        setIsAuthenticated(true);
       }
     } catch (err) {
-      console.error("Invalid toke n:", err);
+      console.error("Auth error:", err);
       logout();
       if (redirectIfUnauthorized) {
         router.push("/sign-in");
@@ -59,7 +74,7 @@ export function useAuth(redirectIfUnauthorized: boolean = false) {
     } finally {
       setLoading(false);
     }
-  }, [redirectIfUnauthorized, router]);
+  }, [redirectIfUnauthorized, role, router]);
 
   const login = (token: string, user: User) => {
     localStorage.setItem("accessToken", token);

@@ -44,6 +44,7 @@ export interface Product {
   attributes: Record<string, any>;
   tags: string[];
   stockControlled: boolean;
+  supplierId: string;
   status: string | null;
   compatibility: CompatibilityData[];
   createdAt: Date;

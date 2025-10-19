@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { ShoppingCart, User, Menu, Bell } from "lucide-react";
+import { ShoppingCart, User, Bell } from "lucide-react";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import { useCart } from "@/context/use-cart";
@@ -42,14 +42,14 @@ export function Header() {
         <div className="flex items-center justify-between py-4">
           {/* Logo */}
           <div className="flex items-center space-x-4">
-            <Button
+            {/* <Button
               variant="ghost"
               size="sm"
               className="md:hidden"
               onClick={() => onNavigate?.("menu")}
             >
               <Menu className="h-5 w-5" />
-            </Button>
+            </Button> */}
 
             <Link href="/" className="flex items-center space-x-2">
               <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">

@@ -36,8 +36,6 @@ import {
   Trash2,
   Copy,
   Eye,
-  Upload,
-  Download,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -118,20 +116,10 @@ export default function InventoryPage() {
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Inventory Management</h1>
-          <p className="text-muted-foreground">
-            Manage your product catalog and stock levels
-          </p>
+          <h1 className="text-xl font-bold">Inventory Management</h1>
+          <p className="text-muted-foreground">Manage your product</p>
         </div>
         <div className="flex gap-3">
-          <Button variant="outline" className="gap-2">
-            <Upload className="h-4 w-4" />
-            Bulk Upload
-          </Button>
-          <Button variant="outline" className="gap-2">
-            <Download className="h-4 w-4" />
-            Export
-          </Button>
           <Button
             onClick={() => router.push("/supplier/products/add")}
             className="gap-2"
