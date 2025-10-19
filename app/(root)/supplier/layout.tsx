@@ -10,7 +10,7 @@ export default function SupplierLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { user, loading } = useAuth(true, "supplier");
+  const { loading } = useAuth(true, "supplier");
 
   if (loading) {
     return (

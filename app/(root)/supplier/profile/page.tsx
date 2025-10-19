@@ -14,9 +14,10 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
-import { User } from "@/types/user";
+import { UpdateUserDto } from "@/types/user";
 import { Edit, Save, X } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
+import { updateUser } from "@/lib/api/services/user.service";
 
 export default function UserProfile() {
   const { user } = useAuth();
@@ -52,6 +53,19 @@ export default function UserProfile() {
     }));
   };
 
+  // export interface UpdateUserDto {
+  //   email: string;
+  //   name: string;
+  //   contact: UserContact;
+  // }
+
+  //   export interface UserContact {
+  //   phone: string;
+  //   address: string;
+  //   country: string;
+  //   city: string;
+  // }
+
   const handleSave = async () => {
     if (!user) {
       toast.error("User not authenticated");
@@ -60,10 +74,11 @@ export default function UserProfile() {
 
     setIsLoading(true);
     try {
-      const updatedUserData: Partial<User> = {
+      // Build the DTO in your expected format
+      const updatedUserData: UpdateUserDto = {
+        id: user.id,
         name: formData.name,
         email: formData.email,
-        // avatar: formData.avatar,
         contact: {
           phone: formData.phone,
           address: formData.address,
@@ -72,11 +87,13 @@ export default function UserProfile() {
         },
       };
 
+      // 🧩 Call your backend update endpoint
+      await updateUser(user.id, updatedUserData);
       setIsEditing(false);
-      toast.success("Profile updated successfully!", updatedUserData);
+      toast.success("Profile updated successfully!");
     } catch (error) {
       console.error("Failed to update profile:", error);
-      toast.error("Failed to update profile");
+      toast.error("Failed to update profile. Please try again later.");
     } finally {
       setIsLoading(false);
     }

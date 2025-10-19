@@ -24,8 +24,6 @@ export interface UpdateUserDto {
   id: string;
   email: string;
   name: string;
-  passwordHash: string;
-  role: UserRole;
   contact: UserContact;
 }
 
@@ -45,6 +43,7 @@ export interface User {
   contact: UserContact | null;
   status: string;
   role: UserRole;
+  isOnboarded: boolean;
   createdAt: Date;
   updatedAt: Date;
   supplierDetails?: SupplierDetails;

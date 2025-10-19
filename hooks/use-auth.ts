@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
 import { useRouter } from "next/navigation";
 import { User } from "@/types/user";
+import { findUserById } from "@/lib/api/services/user.service";
 
 interface DecodedToken {
   exp: number;
@@ -43,27 +44,54 @@ export function useAuth(
         if (redirectIfUnauthorized) {
           router.push("/sign-in");
         }
-      } else {
-        // Restore user from localStorage
-        const storedUser = localStorage.getItem("user");
+        return;
+      }
 
-        let parsedUser: User | null = null;
-        if (storedUser) {
-          parsedUser = JSON.parse(storedUser) as User;
-          setUser(parsedUser);
-        } else {
-          // If no stored user but token exists, treat as invalid state
-          throw new Error("No stored user found");
+      const storedUser = localStorage.getItem("user");
+      if (!storedUser) throw new Error("No stored user found");
+
+      const parsedUser = JSON.parse(storedUser) as User;
+      setUser(parsedUser);
+
+      // Role-based check
+      if (role !== "none") {
+        const userRole = parsedUser.role;
+        if (userRole !== role) {
+          router.push("/");
+          return;
         }
+      }
 
-        if (role !== "none") {
-          const userRole = parsedUser.role;
-          if (userRole !== role) {
-            router.push("/");
-          }
-        }
+      // Supplier onboarding check
+      if (parsedUser.role === "supplier" && parsedUser.isOnboarded !== true) {
+        router.push("/supplier/onboard");
+        return;
+      }
 
-        setIsAuthenticated(true);
+      setIsAuthenticated(true);
+
+      // ✅ After everything is set, revalidate user in background
+      if (parsedUser?.id) {
+        findUserById(parsedUser.id)
+          .then((freshUser) => {
+            if (freshUser) {
+              setUser(freshUser);
+              localStorage.setItem("user", JSON.stringify(freshUser));
+
+              // Handle changes in role/onboarding dynamically
+              if (
+                freshUser.role === "supplier" &&
+                freshUser.isOnboarded !== true
+              ) {
+                router.push("/supplier/onboard");
+              } else if (role !== "none" && freshUser.role !== role) {
+                router.push("/");
+              }
+            }
+          })
+          .catch((err) => {
+            console.error("Failed to revalidate user:", err);
+          });
       }
     } catch (err) {
       console.error("Auth error:", err);
