@@ -19,100 +19,13 @@ import {
   Plus,
   ArrowUpRight,
 } from "lucide-react";
-
-const statsData = [
-  {
-    title: "Total Revenue",
-    value: "ETB 2,45,680",
-    change: "+12.5%",
-    trend: "up",
-    description: "This month",
-    icon: DollarSign,
-  },
-  {
-    title: "Orders Today",
-    value: "47",
-    change: "+8.2%",
-    trend: "up",
-    description: "vs yesterday",
-    icon: ShoppingCart,
-  },
-  {
-    title: "Active Products",
-    value: "1,234",
-    change: "+23",
-    trend: "up",
-    description: "Total listed",
-    icon: Package,
-  },
-  {
-    title: "Low Stock Alerts",
-    value: "12",
-    change: "-3",
-    trend: "down",
-    description: "Need attention",
-    icon: AlertTriangle,
-  },
-];
-
-const recentOrders = [
-  {
-    id: "ORD-001",
-    customer: "John Doe",
-    items: "Brake Pads Set",
-    amount: "ETB 4,500",
-    status: "pending",
-    time: "2 hours ago",
-  },
-  {
-    id: "ORD-002",
-    customer: "Sarah Johnson",
-    items: "Engine Oil Filter",
-    amount: "ETB 850",
-    status: "paid",
-    time: "4 hours ago",
-  },
-  {
-    id: "ORD-003",
-    customer: "Mike Wilson",
-    items: "Spark Plugs (4x)",
-    amount: "ETB 2,200",
-    status: "shipped",
-    time: "6 hours ago",
-  },
-  {
-    id: "ORD-004",
-    customer: "Lisa Chen",
-    items: "Air Filter",
-    amount: "ETB 650",
-    status: "delivered",
-    time: "1 day ago",
-  },
-];
-
-const lowStockProducts = [
-  {
-    sku: "BP-001",
-    name: "Brake Pads - Honda Civic",
-    currentStock: 3,
-    threshold: 10,
-    status: "critical",
-  },
-  {
-    sku: "OF-052",
-    name: "Oil Filter - Toyota Camry",
-    currentStock: 7,
-    threshold: 15,
-    status: "low",
-  },
-  {
-    sku: "SP-203",
-    name: "Spark Plugs - Ford Focus",
-    currentStock: 12,
-    threshold: 20,
-    status: "low",
-  },
-];
+import { useEffect, useState } from "react";
+import { getOrders } from "@/lib/api/services/order.service";
+import { getProducts } from "@/lib/api/services/product.service";
+import { getInventories } from "@/lib/api/services/inventory.service";
+import { Order } from "@/types/order";
+import { Product } from "@/types/product";
+import { Inventory } from "@/types/inventory";
 
 const quickActions = [
   { label: "Add Product", icon: Plus, action: "add-product" },
@@ -125,8 +38,90 @@ export default function DashboardPage() {
     console.log("Navigate to:", page);
   };
 
+  const [recentOrders, setRecentOrders] = useState<Order[]>([]);
+  const [recentProducts, setRecentProducts] = useState<Product[]>([]);
+  const [lowStockInventories, setLowStockInventories] = useState<Inventory[]>(
+    []
+  );
+
+  useEffect(() => {
+    const fetchDetails = async () => {
+      const orders = await getOrders();
+      setRecentOrders(orders);
+      const products = await getProducts();
+      setRecentProducts(products);
+      const inventories = await getInventories();
+      const lowStock = inventories.filter(
+        (inv) => inv.quantity < inv.reorderTreshould
+      );
+      setLowStockInventories(lowStock);
+    };
+
+    fetchDetails();
+  }, []);
+
+  const todayStr = new Date().toDateString();
+  const yesterdayStr = new Date(Date.now() - 86400000).toDateString();
+  const ordersToday = recentOrders.filter(
+    (o) => o.placedAt.toDateString() === todayStr
+  ).length;
+  const ordersYesterday = recentOrders.filter(
+    (o) => o.placedAt.toDateString() === yesterdayStr
+  ).length;
+
+  let ordersChange = "+0%";
+  let ordersTrend: "up" | "down" = "up";
+  if (ordersYesterday > 0) {
+    const pct = (
+      ((ordersToday - ordersYesterday) / ordersYesterday) *
+      100
+    ).toFixed(1);
+    ordersChange = `${Number(pct) > 0 ? "+" : ""}${pct}%`;
+    ordersTrend = Number(pct) > 0 ? "up" : "down";
+  } else if (ordersToday > 0) {
+    ordersChange = "+100%";
+    ordersTrend = "up";
+  }
+
+  const statsData = [
+    {
+      title: "Total Revenue",
+      value: `ETB ${recentOrders.reduce((sum, o) => sum + o.total, 0).toLocaleString()}`,
+      change: "+12.5%",
+      trend: "up",
+      description: "This month",
+      icon: DollarSign,
+    },
+    {
+      title: "Orders Today",
+      value: ordersToday.toString(),
+      change: ordersChange,
+      trend: ordersTrend,
+      description: "vs yesterday",
+      icon: ShoppingCart,
+    },
+    {
+      title: "Active Products",
+      value: recentProducts
+        .filter((p) => p.status === "active")
+        .length.toLocaleString(),
+      change: "+23",
+      trend: "up",
+      description: "Total listed",
+      icon: Package,
+    },
+    {
+      title: "Low Stock Alerts",
+      value: lowStockInventories.length.toString(),
+      change: "-3",
+      trend: "down",
+      description: "Need attention",
+      icon: AlertTriangle,
+    },
+  ];
+
   const getStatusColor = (status: string) => {
-    switch (status) {
+    switch (status.toLowerCase()) {
       case "pending":
         return "bg-yellow-100 text-yellow-800";
       case "paid":
@@ -142,6 +137,10 @@ export default function DashboardPage() {
       default:
         return "bg-gray-100 text-gray-800";
     }
+  };
+
+  const getStockStatus = (quantity: number): "critical" | "low" => {
+    return quantity < 5 ? "critical" : "low";
   };
 
   return (
@@ -221,28 +220,40 @@ export default function DashboardPage() {
             </Button>
           </CardHeader>
           <CardContent className="space-y-4">
-            {recentOrders.map((order) => (
-              <div
-                key={order.id}
-                className="flex items-center justify-between p-3 rounded-lg border"
-              >
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium">{order.id}</span>
-                    <Badge className={getStatusColor(order.status)}>
-                      {order.status}
-                    </Badge>
+            {recentOrders.length > 0 ? (
+              recentOrders.map((order) => (
+                <div
+                  key={order.id}
+                  className="flex items-center justify-between p-3 rounded-lg border"
+                >
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">{order.id}</span>
+                      <Badge className={getStatusColor(order.status)}>
+                        {order.status.toLowerCase()}
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      {order.customer?.name || "Unknown Customer"} •{" "}
+                      {order.items.length} items
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {order.placedAt.toLocaleDateString()}
+                    </p>
                   </div>
-                  <p className="text-sm text-muted-foreground">
-                    {order.customer} • {order.items}
-                  </p>
-                  <p className="text-xs text-muted-foreground">{order.time}</p>
+                  <div className="text-right">
+                    <p className="font-medium">
+                      ETB {order.total.toLocaleString()}
+                    </p>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <p className="font-medium">{order.amount}</p>
-                </div>
+              ))
+            ) : (
+              <div className="flex flex-col items-center justify-center p-4 text-muted-foreground">
+                <ShoppingCart className="h-8 w-8 mb-2" />
+                <p>No recent orders</p>
               </div>
-            ))}
+            )}
           </CardContent>
         </Card>
 
@@ -263,33 +274,100 @@ export default function DashboardPage() {
             </Button>
           </CardHeader>
           <CardContent className="space-y-4">
-            {lowStockProducts.map((product) => (
+            {lowStockInventories.length > 0 ? (
+              lowStockInventories.map((inventory) => {
+                const status = getStockStatus(inventory.quantity);
+                return (
+                  <div
+                    key={inventory.id}
+                    className="flex items-center justify-between p-3 rounded-lg border"
+                  >
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium">
+                          {inventory.product.sku}
+                        </span>
+                        <Badge className={getStatusColor(status)}>
+                          {status}
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        {inventory.product.name}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-medium">{inventory.quantity} left</p>
+                      <p className="text-xs text-muted-foreground">
+                        Min: {inventory.reorderTreshould}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="flex flex-col items-center justify-center p-4 text-muted-foreground">
+                <AlertTriangle className="h-8 w-8 mb-2" />
+                <p>No low stock alerts</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Recent Products (added section to utilize the state) */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle>Recent Products</CardTitle>
+            <CardDescription>Newly added or updated products</CardDescription>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onNavigate("products")}
+          >
+            View All
+            <ArrowUpRight className="ml-1 h-4 w-4" />
+          </Button>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {recentProducts.length > 0 ? (
+            recentProducts.map((product) => (
               <div
-                key={product.sku}
+                key={product.id}
                 className="flex items-center justify-between p-3 rounded-lg border"
               >
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     <span className="font-medium">{product.sku}</span>
-                    <Badge className={getStatusColor(product.status)}>
-                      {product.status}
-                    </Badge>
+                    {product.status && (
+                      <Badge className={getStatusColor(product.status)}>
+                        {product.status}
+                      </Badge>
+                    )}
                   </div>
                   <p className="text-sm text-muted-foreground">
                     {product.name}
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="font-medium">{product.currentStock} left</p>
+                  <p className="font-medium">
+                    ETB {product.price.toLocaleString()}
+                  </p>
                   <p className="text-xs text-muted-foreground">
-                    Min: {product.threshold}
+                    Created: {product.createdAt.toLocaleString()}
                   </p>
                 </div>
               </div>
-            ))}
-          </CardContent>
-        </Card>
-      </div>
+            ))
+          ) : (
+            <div className="flex flex-col items-center justify-center p-4 text-muted-foreground">
+              <Package className="h-8 w-8 mb-2" />
+              <p>No recent products</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

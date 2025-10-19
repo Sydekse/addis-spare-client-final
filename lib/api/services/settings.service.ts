@@ -13,7 +13,9 @@ export async function createSettings(data: CreateSettingDto) {
   return response.data;
 }
 
-export async function updateUserPermissions(data: UserPermissionSettingUpdateDto) {
+export async function updateUserPermissions(
+  data: UserPermissionSettingUpdateDto
+) {
   const response = await api.post("/settings/update-permissions", data);
   return response.data;
 }

@@ -93,7 +93,7 @@ export default function RatingReview({ product }: RatingReviewProps) {
   };
 
   return (
-    <div className="w-full grid grid-cols-2 sm:gap-3 md:gap-6">
+    <div className="w-full grid grid-cols-2 gap-3 md:gap-6">
       {/* Rating Button */}
       <Dialog open={ratingDialogOpen} onOpenChange={setRatingDialogOpen}>
         <DialogTrigger asChild>

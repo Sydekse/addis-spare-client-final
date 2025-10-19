@@ -1,7 +1,7 @@
 /* eslint-disable */
 // @ts-nocheck
 "use client";
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -38,135 +38,59 @@ import {
   AreaChart,
   Area,
   Legend,
+  Line,
 } from "recharts";
 import { KpiCard } from "@/components/charts/KpiCard";
 import { ChartCard } from "@/components/charts/ChartCard";
 import { ReportsTable } from "@/components/charts/ReportsTable";
 import { ExportModal } from "@/components/charts/ExportModal";
+import { Product } from "@/types/product";
+import { Inventory } from "@/types/inventory";
+import { Order } from "@/types/order";
+import { getProducts } from "@/lib/api/services/product.service";
+import { getOrders } from "@/lib/api/services/order.service";
+import { getInventories } from "@/lib/api/services/inventory.service";
 
-// Mock data for different report types
-const mockProductsData = [
-  {
-    id: "1",
-    sku: "BP-HC-001",
-    name: "Brake Pads Set",
-    category: "Brakes",
-    price: 4500,
-    stock: 45,
-    sales: 127,
-    revenue: 571500,
-    supplier: "Brembo",
-  },
-  {
-    id: "2",
-    sku: "OF-TC-052",
-    name: "Oil Filter",
-    category: "Filters",
-    price: 850,
-    stock: 12,
-    sales: 89,
-    revenue: 75650,
-    supplier: "OEM",
-  },
-  {
-    id: "3",
-    sku: "SP-FF-203",
-    name: "Spark Plugs",
-    category: "Engine",
-    price: 2200,
-    stock: 8,
-    sales: 156,
-    revenue: 343200,
-    supplier: "NGK",
-  },
-  {
-    id: "4",
-    sku: "AF-NS-101",
-    name: "Air Filter",
-    category: "Filters",
-    price: 1200,
-    stock: 23,
-    sales: 98,
-    revenue: 117600,
-    supplier: "K&N",
-  },
-  {
-    id: "5",
-    sku: "TB-HY-075",
-    name: "Timing Belt",
-    category: "Engine",
-    price: 3200,
-    stock: 0,
-    sales: 67,
-    revenue: 214400,
-    supplier: "Gates",
-  },
-];
+// Color maps
+const categoryColors = {
+  Brakes: "#ff6b35",
+  Engine: "#2563eb",
+  Filters: "#10b981",
+  Suspension: "#f59e0b",
+  Other: "#8b5cf6",
+};
 
-const mockOrdersData = [
-  { date: "2024-01-01", orders: 45, revenue: 245680, avgOrder: 5459 },
-  { date: "2024-01-02", orders: 52, revenue: 287340, avgOrder: 5525 },
-  { date: "2024-01-03", orders: 38, revenue: 198750, avgOrder: 5230 },
-  { date: "2024-01-04", orders: 61, revenue: 342180, avgOrder: 5609 },
-  { date: "2024-01-05", orders: 47, revenue: 256790, avgOrder: 5463 },
-  { date: "2024-01-06", orders: 55, revenue: 301245, avgOrder: 5477 },
-  { date: "2024-01-07", orders: 49, revenue: 268950, avgOrder: 5489 },
-];
-
-const mockInventoryData = [
-  {
-    location: "Warehouse A",
-    products: 234,
-    totalStock: 1250,
-    lowStock: 12,
-    value: 2450000,
-  },
-  {
-    location: "Warehouse B",
-    products: 187,
-    totalStock: 890,
-    lowStock: 8,
-    value: 1890000,
-  },
-  {
-    location: "Store Front",
-    products: 98,
-    totalStock: 445,
-    lowStock: 5,
-    value: 892000,
-  },
-  {
-    location: "Drop Ship",
-    products: 156,
-    totalStock: 0,
-    lowStock: 0,
-    value: 0,
-  },
-];
-
-const categoryDistribution = [
-  { category: "Brakes", value: 35, sales: 127, color: "#ff6b35" },
-  { category: "Engine", value: 28, sales: 223, color: "#2563eb" },
-  { category: "Filters", value: 22, sales: 187, color: "#10b981" },
-  { category: "Suspension", value: 10, sales: 89, color: "#f59e0b" },
-  { category: "Other", value: 5, sales: 45, color: "#8b5cf6" },
-];
-
-const paymentMethods = [
-  { method: "UPI", value: 45, amount: 567800, color: "#ff6b35" },
-  { method: "Credit Card", value: 30, amount: 378900, color: "#2563eb" },
-  { method: "Bank Transfer", value: 15, amount: 189450, color: "#10b981" },
-  { method: "Cash", value: 10, amount: 126300, color: "#f59e0b" },
-];
+const paymentColors = {
+  UPI: "#ff6b35",
+  "Credit Card": "#2563eb",
+  "Bank Transfer": "#10b981",
+  Cash: "#f59e0b",
+};
 
 export default function Reports() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [inventory, setInventory] = useState<Inventory[]>([]);
   const [activeReport, setActiveReport] = useState("products");
   const [dateRange, setDateRange] = useState("7days");
   const [showExportModal, setShowExportModal] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
 
-  const chartsRef = useRef<HTMLDivElement>(null);
-  const tableRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    // Fetch data for products, orders, and inventory
+    const fetchData = async () => {
+      const productsData = await getProducts();
+      const ordersData = await getOrders();
+      const inventoryData = await getInventories();
+      setProducts(productsData);
+      setOrders(ordersData);
+      setInventory(inventoryData);
+    };
+    fetchData();
+  }, []);
+
+  const chartsRef = useRef(null);
+  const tableRef = useRef(null);
 
   const reportTypes = [
     { id: "products", label: "Products Report", icon: Package },
@@ -174,18 +98,164 @@ export default function Reports() {
     { id: "inventory", label: "Inventory Report", icon: BarChart3 },
   ];
 
+  const filteredOrders = useMemo(() => {
+    const current = new Date();
+    let start = new Date(current);
+    switch (dateRange) {
+      case "7days":
+        start.setDate(start.getDate() - 7);
+        break;
+      case "30days":
+        start.setDate(start.getDate() - 30);
+        break;
+      case "90days":
+        start.setDate(start.getDate() - 90);
+        break;
+      case "1year":
+        start.setFullYear(start.getFullYear() - 1);
+        break;
+      default:
+        start.setDate(start.getDate() - 7);
+    }
+    return orders.filter((o) => o.placedAt >= start && o.placedAt <= current);
+  }, [dateRange, orders]);
+
+  const productReportData = useMemo(() => {
+    return products.map((p) => {
+      const stock = inventory
+        .filter((i) => i.productId === p.id)
+        .reduce((sum, i) => sum + i.quantity, 0);
+      const sales = filteredOrders
+        .flatMap((o) => o.items)
+        .filter((i) => i.productId === p.id)
+        .reduce((sum, i) => sum + i.quantity, 0);
+      const revenue = sales * p.price;
+      return {
+        id: p.id,
+        sku: p.sku,
+        name: p.name,
+        category: p.category,
+        price: p.price,
+        stock,
+        sales,
+        revenue,
+        supplier: p.brand,
+      };
+    });
+  }, [products, inventory, filteredOrders]);
+
+  const orderDailyData = useMemo(() => {
+    const dailyMap = {};
+    filteredOrders.forEach((o) => {
+      const dateStr = o.placedAt.toISOString().slice(0, 10);
+      if (!dailyMap[dateStr]) {
+        dailyMap[dateStr] = {
+          date: dateStr,
+          orders: 0,
+          revenue: 0,
+          avgOrder: 0,
+        };
+      }
+      dailyMap[dateStr].orders += 1;
+      dailyMap[dateStr].revenue += o.total;
+    });
+    const list = Object.values(dailyMap);
+    list.forEach((d) => {
+      d.avgOrder = d.orders > 0 ? d.revenue / d.orders : 0;
+    });
+    return list.sort((a, b) => a.date.localeCompare(b.date));
+  }, [filteredOrders]);
+
+  const inventorySummary = useMemo(() => {
+    const summaryMap = {};
+    inventory.forEach((i) => {
+      if (!summaryMap[i.location]) {
+        summaryMap[i.location] = {
+          location: i.location,
+          products: new Set(),
+          totalStock: 0,
+          lowStock: 0,
+          value: 0,
+        };
+      }
+      const s = summaryMap[i.location];
+      s.products.add(i.productId);
+      s.totalStock += i.quantity;
+      if (i.quantity < i.reorderTreshould) {
+        s.lowStock += 1;
+      }
+      const p = products.find((p) => p.id === i.productId);
+      if (p) {
+        s.value += p.price * i.quantity;
+      }
+    });
+    Object.values(summaryMap).forEach((s) => {
+      s.products = s.products.size;
+    });
+    return Object.values(summaryMap);
+  }, [inventory, products]);
+
+  const categoryDistribution = useMemo(() => {
+    const catMap = {};
+    productReportData.forEach((p) => {
+      if (!catMap[p.category]) {
+        catMap[p.category] = {
+          category: p.category,
+          value: 0,
+          sales: 0,
+          color: categoryColors[p.category] || "#000000",
+        };
+      }
+      catMap[p.category].sales += p.sales;
+      catMap[p.category].value += p.revenue;
+    });
+    const totalRevenue = productReportData.reduce(
+      (sum, p) => sum + p.revenue,
+      0
+    );
+    Object.values(catMap).forEach((c) => {
+      c.value =
+        totalRevenue > 0 ? ((c.value / totalRevenue) * 100).toFixed(0) : 0;
+    });
+    return Object.values(catMap);
+  }, [productReportData]);
+
+  const paymentMethods = useMemo(() => {
+    const payMap = {};
+    filteredOrders.forEach((o) => {
+      const m = o.paymentMethod || "Unknown";
+      if (!payMap[m]) {
+        payMap[m] = {
+          method: m,
+          value: 0,
+          amount: 0,
+          color: paymentColors[m] || "#000000",
+        };
+      }
+      payMap[m].amount += o.total;
+    });
+    const total = filteredOrders.reduce((sum, o) => sum + o.total, 0);
+    Object.values(payMap).forEach((p) => {
+      p.value = total > 0 ? ((p.amount / total) * 100).toFixed(0) : 0;
+    });
+    return Object.values(payMap);
+  }, [filteredOrders]);
+
   // Compute KPIs based on active report
   const kpis = useMemo(() => {
     switch (activeReport) {
       case "products":
-        const totalProducts = mockProductsData.length;
-        const totalRevenue = mockProductsData.reduce(
+        const totalProducts = productReportData.length;
+        const totalRevenue = productReportData.reduce(
           (sum, p) => sum + p.revenue,
           0
         );
         const avgPrice =
-          mockProductsData.reduce((sum, p) => sum + p.price, 0) / totalProducts;
-        const lowStockCount = mockProductsData.filter(
+          totalProducts > 0
+            ? productReportData.reduce((sum, p) => sum + p.price, 0) /
+              totalProducts
+            : 0;
+        const lowStockCount = productReportData.filter(
           (p) => p.stock < 10
         ).length;
 
@@ -221,15 +291,13 @@ export default function Reports() {
         ];
 
       case "orders":
-        const totalOrders = mockOrdersData.reduce(
-          (sum, o) => sum + o.orders,
+        const totalOrders = filteredOrders.length;
+        const totalOrderRevenue = filteredOrders.reduce(
+          (sum, o) => sum + o.total,
           0
         );
-        const totalOrderRevenue = mockOrdersData.reduce(
-          (sum, o) => sum + o.revenue,
-          0
-        );
-        const avgOrderValue = totalOrderRevenue / totalOrders;
+        const avgOrderValue =
+          totalOrders > 0 ? totalOrderRevenue / totalOrders : 0;
 
         return [
           {
@@ -263,16 +331,16 @@ export default function Reports() {
         ];
 
       case "inventory":
-        const totalLocations = mockInventoryData.length;
-        const totalInventoryValue = mockInventoryData.reduce(
+        const totalLocations = inventorySummary.length;
+        const totalInventoryValue = inventorySummary.reduce(
           (sum, i) => sum + i.value,
           0
         );
-        const totalLowStock = mockInventoryData.reduce(
+        const totalLowStock = inventorySummary.reduce(
           (sum, i) => sum + i.lowStock,
           0
         );
-        const totalStockUnits = mockInventoryData.reduce(
+        const totalStockUnits = inventorySummary.reduce(
           (sum, i) => sum + i.totalStock,
           0
         );
@@ -311,7 +379,7 @@ export default function Reports() {
       default:
         return [];
     }
-  }, [activeReport]);
+  }, [activeReport, productReportData, filteredOrders, inventorySummary]);
 
   const handleGenerateReport = async () => {
     setIsGenerating(true);
@@ -321,6 +389,31 @@ export default function Reports() {
   };
 
   const renderCharts = () => {
+    let data = [];
+    switch (activeReport) {
+      case "products":
+        data = productReportData;
+        break;
+      case "orders":
+        data = orderDailyData;
+        break;
+      case "inventory":
+        data = inventorySummary;
+        break;
+    }
+    if (data.length < 5) {
+      return (
+        <Card className="border border-border">
+          <CardContent className="flex flex-col items-center justify-center py-8">
+            <AlertTriangle className="h-8 w-8 mb-4" />
+            <p className="text-center text-muted-foreground">
+              Please add more records
+            </p>
+          </CardContent>
+        </Card>
+      );
+    }
+
     switch (activeReport) {
       case "products":
         return (
@@ -330,7 +423,7 @@ export default function Reports() {
               className="lg:col-span-1"
             >
               <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={mockProductsData.slice(0, 5)}>
+                <BarChart data={productReportData.slice(0, 5)}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis
                     dataKey="sku"
@@ -344,7 +437,7 @@ export default function Reports() {
                       border: "1px solid var(--border)",
                       borderRadius: "var(--radius-md)",
                     }}
-                    formatter={(value: number) => [
+                    formatter={(value) => [
                       `ETB ${value.toLocaleString()}`,
                       "Revenue",
                     ]}
@@ -370,9 +463,7 @@ export default function Reports() {
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
-                  <Tooltip
-                    formatter={(value: number) => [`${value}%`, "Share"]}
-                  />
+                  <Tooltip formatter={(value) => [`${value}%`, "Share"]} />
                   <Legend />
                 </RechartsPieChart>
               </ResponsiveContainer>
@@ -385,7 +476,7 @@ export default function Reports() {
           <div className="grid gap-6 lg:grid-cols-2">
             <ChartCard title="Daily Revenue Trend" className="lg:col-span-2">
               <ResponsiveContainer width="100%" height={300}>
-                <AreaChart data={mockOrdersData}>
+                <AreaChart data={orderDailyData}>
                   <defs>
                     <linearGradient
                       id="revenueGradient"
@@ -425,7 +516,7 @@ export default function Reports() {
                       border: "1px solid var(--border)",
                       borderRadius: "var(--radius-md)",
                     }}
-                    formatter={(value: number) => [
+                    formatter={(value) => [
                       `ETB ${value.toLocaleString()}`,
                       "Revenue",
                     ]}
@@ -460,9 +551,7 @@ export default function Reports() {
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
-                  <Tooltip
-                    formatter={(value: number) => [`${value}%`, "Share"]}
-                  />
+                  <Tooltip formatter={(value) => [`${value}%`, "Share"]} />
                 </RechartsPieChart>
               </ResponsiveContainer>
             </ChartCard>
@@ -472,7 +561,7 @@ export default function Reports() {
               className="lg:col-span-1"
             >
               <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={mockOrdersData}>
+                <BarChart data={orderDailyData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis
                     dataKey="date"
@@ -485,15 +574,43 @@ export default function Reports() {
                       })
                     }
                   />
-                  <YAxis stroke="var(--muted-foreground)" fontSize={12} />
+                  <YAxis
+                    yAxisId="left"
+                    stroke="var(--muted-foreground)"
+                    fontSize={12}
+                  />
+                  <YAxis
+                    yAxisId="right"
+                    orientation="right"
+                    stroke="var(--muted-foreground)"
+                    fontSize={12}
+                  />
                   <Tooltip
                     contentStyle={{
                       backgroundColor: "var(--card)",
                       border: "1px solid var(--border)",
                       borderRadius: "var(--radius-md)",
                     }}
+                    formatter={(value, name) => {
+                      if (name === "orders") return [value, "Orders"];
+                      if (name === "avgOrder")
+                        return [`ETB ${value}`, "Avg Order Value"];
+                      return [value, name];
+                    }}
                   />
-                  <Bar dataKey="orders" fill="#2563eb" radius={[4, 4, 0, 0]} />
+                  <Legend />
+                  <Bar
+                    dataKey="orders"
+                    fill="#2563eb"
+                    radius={[4, 4, 0, 0]}
+                    yAxisId="left"
+                  />
+                  <Line
+                    dataKey="avgOrder"
+                    stroke="#ff6b35"
+                    yAxisId="right"
+                    strokeWidth={2}
+                  />
                 </BarChart>
               </ResponsiveContainer>
             </ChartCard>
@@ -505,7 +622,7 @@ export default function Reports() {
           <div className="grid gap-6 lg:grid-cols-2">
             <ChartCard title="Stock by Location" className="lg:col-span-2">
               <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={mockInventoryData}>
+                <BarChart data={inventorySummary}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis
                     dataKey="location"
@@ -541,20 +658,16 @@ export default function Reports() {
               <ResponsiveContainer width="100%" height={300}>
                 <RechartsPieChart>
                   <Pie
-                    data={mockInventoryData.filter((d) => d.value > 0)}
+                    data={inventorySummary.filter((d) => d.value > 0)}
                     cx="50%"
                     cy="50%"
                     outerRadius={120}
                     dataKey="value"
-                    label={({
-                      location,
-                      value,
-                    }: {
-                      location: string;
-                      value: number;
-                    }) => `${location}: ETB ${(value / 100000).toFixed(1)}L`}
+                    label={({ location, value }) =>
+                      `${location}: ETB ${(value / 100000).toFixed(1)}L`
+                    }
                   >
-                    {mockInventoryData.map((entry, index) => (
+                    {inventorySummary.map((entry, index) => (
                       <Cell
                         key={`cell-${index}`}
                         fill={`var(--chart-${(index % 5) + 1})`}
@@ -562,7 +675,7 @@ export default function Reports() {
                     ))}
                   </Pie>
                   <Tooltip
-                    formatter={(value: number) => [
+                    formatter={(value) => [
                       `ETB ${value.toLocaleString()}`,
                       "Value",
                     ]}
@@ -573,7 +686,7 @@ export default function Reports() {
 
             <ChartCard title="Products per Location" className="lg:col-span-1">
               <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={mockInventoryData}>
+                <BarChart data={inventorySummary}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis
                     dataKey="location"
@@ -618,7 +731,7 @@ export default function Reports() {
             "Revenue",
             "Supplier",
           ],
-          data: mockProductsData,
+          data: productReportData,
           keyMapping: {
             SKU: "sku",
             Name: "name",
@@ -633,7 +746,7 @@ export default function Reports() {
       case "orders":
         return {
           columns: ["Date", "Orders", "Revenue", "Avg Order"],
-          data: mockOrdersData,
+          data: orderDailyData,
           keyMapping: {
             Date: "date",
             Orders: "orders",
@@ -650,7 +763,7 @@ export default function Reports() {
             "Low Stock",
             "Value",
           ],
-          data: mockInventoryData,
+          data: inventorySummary,
           keyMapping: {
             Location: "location",
             Products: "products",
@@ -663,6 +776,8 @@ export default function Reports() {
         return { columns: [], data: [], keyMapping: {} };
     }
   };
+
+  const tableData = getTableData();
 
   return (
     <div className="space-y-6" id="main-report">
@@ -753,7 +868,7 @@ export default function Reports() {
       <div ref={tableRef}>
         <ReportsTable
           title={`${reportTypes.find((t) => t.id === activeReport)?.label} Data`}
-          {...getTableData()}
+          {...tableData}
         />
       </div>
 

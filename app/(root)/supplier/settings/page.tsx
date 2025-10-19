@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -41,11 +41,13 @@ import {
   Upload,
   Save,
   X,
-  Edit3,
   CheckCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useCloudinaryUpload } from "@/lib/cloudinary/uploadImage";
+import { useAuth } from "@/hooks/use-auth";
+import { findUserById } from "@/lib/api/services/user.service";
+import { updateSupplier } from "@/lib/api/services/supplier.service";
 
 interface FormData {
   businessName: string;
@@ -65,7 +67,7 @@ interface FormData {
   specializations: string[];
   licenseType: string;
   licenseNumber: string;
-  uploadedFiles: File[];
+  uploadedFiles: string[];
   existingFiles?: string[];
 }
 
@@ -98,8 +100,83 @@ const licenseTypes = [
 
 export default function Page() {
   const router = useRouter();
-
   const { uploadRawFile, loading } = useCloudinaryUpload();
+  const { user } = useAuth(true);
+
+  const [formData, setFormData] = useState<FormData>({
+    businessName: "",
+    businessType: "",
+    taxId: "",
+    establishedYear: "",
+    numberOfEmployees: "",
+    website: "",
+    contactPersonName: "",
+    contactEmail: "",
+    contactPhone: "",
+    street: "",
+    building: "",
+    city: "",
+    country: "",
+    businessDescription: "",
+    specializations: [],
+    licenseType: "",
+    licenseNumber: "",
+    uploadedFiles: [],
+    existingFiles: [],
+  });
+
+  const [activeTab, setActiveTab] = useState("business");
+
+  useEffect(() => {
+    const fetchSupplierDetails = async () => {
+      const newUser = await findUserById(user!.id);
+      const details = newUser.supplierDetails;
+
+      if (!details) return;
+
+      setFormData({
+        businessName: details.businessName || "",
+        businessType: details.businessType || "",
+        taxId: details.taxId || "",
+        establishedYear: details.establishedYear || "",
+        numberOfEmployees: details.numberOfEmployees || "",
+        website: details.website || "",
+        contactPersonName: details.contactPersonName || "",
+        contactEmail: details.contactEmail || "",
+        contactPhone: details.contactPhone || "",
+        street: details.street || "",
+        building: details.building || "",
+        city: details.city || "",
+        country: details.country || "",
+        businessDescription: details.businessDescription || "",
+        specializations: details.specializations || [],
+        licenseType: details.licenseType || "",
+        licenseNumber: details.licenseNumber || "",
+        uploadedFiles: details.uploadedFiles || [],
+        existingFiles: details.uploadedFiles || [],
+      });
+    };
+
+    if (user?.supplierDetails) {
+      fetchSupplierDetails();
+    }
+  }, [user]);
+
+  const handleInputChange = (
+    field: keyof FormData,
+    value: string | string[] | File | null
+  ) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleSpecializationToggle = (specialization: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      specializations: prev.specializations.includes(specialization)
+        ? prev.specializations.filter((s) => s !== specialization)
+        : [...prev.specializations, specialization],
+    }));
+  };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -111,7 +188,7 @@ export default function Page() {
           if (data?.secure_url) {
             setFormData((prev) => ({
               ...prev,
-              uploadedFiles: [...prev.uploadedFiles, file],
+              uploadedFiles: [...prev.uploadedFiles, data.secure_url],
               existingFiles: [...(prev.existingFiles || []), data.secure_url],
             }));
           }
@@ -125,55 +202,12 @@ export default function Page() {
     }
   };
 
-  const [formData, setFormData] = useState<FormData>({
-    businessName: "AutoParts Express LLC",
-    businessType: "Distributor",
-    taxId: "123-45-6789",
-    establishedYear: "2018",
-    numberOfEmployees: "25-50",
-    website: "https://autopartsexpress.com",
-    contactPersonName: "John Smith",
-    contactEmail: "john.smith@autopartsexpress.com",
-    contactPhone: "+1 (555) 123-4567",
-    street: "1234 Industrial Drive",
-    building: "Suite 200",
-    city: "Detroit",
-    country: "United States",
-    businessDescription:
-      "We are a leading distributor of high-quality automotive parts, specializing in brake systems and engine components. With over 5 years of experience in the industry, we serve customers across North America.",
-    specializations: ["Brake Systems", "Engine Parts", "Electrical Components"],
-    licenseType: "Trade License",
-    licenseNumber: "TL-2018-456789",
-    uploadedFiles: [],
-    existingFiles: ["trade_license_2024.pdf"],
-  });
-
-  const [hasChanges, setHasChanges] = useState(false);
-  const [activeTab, setActiveTab] = useState("business");
-
-  const handleInputChange = (
-    field: keyof FormData,
-    value: string | string[] | File | null
-  ) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-    setHasChanges(true);
-  };
-
-  const handleSpecializationToggle = (specialization: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      specializations: prev.specializations.includes(specialization)
-        ? prev.specializations.filter((s) => s !== specialization)
-        : [...prev.specializations, specialization],
-    }));
-    setHasChanges(true);
-  };
-
-  const handleSave = () => {
+  const handleSave = async () => {
     console.log("Saving supplier profile:", formData);
+    const newUser = await updateSupplier(user?.id as string, formData);
+    console.log("Updated supplier user:", newUser);
     toast.success("Profile updated successfully!");
-    setHasChanges(false);
-    router.push("/supplier");
+    // router.push("/supplier");
   };
 
   const handleCancel = () => {
@@ -201,34 +235,30 @@ export default function Page() {
   };
 
   return (
-    <div className="p-4">
-      <div className="max-w-6xl mx-auto space-y-6">
+    <div className="p-4 sm:p-6">
+      <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-center space-x-4">
-            <Separator orientation="vertical" className="h-6" />
+            <Separator orientation="vertical" className="h-6 hidden sm:block" />
             <div>
-              <h1 className="text-2xl">Edit Supplier Profile</h1>
-              <p className="text-muted-foreground">
+              <h1 className="text-xl sm:text-2xl font-semibold">
+                Edit Supplier Profile
+              </h1>
+              <p className="text-sm sm:text-base text-muted-foreground">
                 Update your business information and settings
               </p>
             </div>
           </div>
-          <div className="flex items-center space-x-3">
-            {hasChanges && (
-              <Badge
-                variant="secondary"
-                className="flex items-center space-x-1"
-              >
-                <Edit3 className="w-3 h-3" />
-                <span>Unsaved changes</span>
-              </Badge>
-            )}
+          <div className="flex items-center space-x-2 sm:space-x-3 w-full sm:w-auto">
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="outline" disabled={!hasChanges}>
-                  <X className="w-4 h-4 mr-2" />
-                  Discard Changes
+                <Button
+                  variant="outline"
+                  className="flex-1 sm:flex-none text-sm py-2"
+                >
+                  <X className="w-4 h-4 mr-1 sm:mr-2" />
+                  <span className="text-xs sm:text-sm">Discard</span>
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
@@ -249,23 +279,22 @@ export default function Page() {
             </AlertDialog>
             <Button
               onClick={handleSave}
-              disabled={!validateForm() || !hasChanges}
-              className="flex items-center space-x-2"
+              disabled={!validateForm()}
+              className="flex-1 sm:flex-none text-sm py-2"
             >
-              <Save className="w-4 h-4" />
-              <span>Save Changes</span>
+              <Save className="w-4 h-4 mr-1 sm:mr-2" />
+              <span className="text-xs sm:text-sm">Save</span>
             </Button>
           </div>
         </div>
 
-        {/* Main Content */}
         <Card className="w-full">
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
+            <CardTitle className="flex items-center space-x-2 text-lg sm:text-xl">
               <Building2 className="w-5 h-5" />
               <span>Supplier Information</span>
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-sm">
               Manage your business profile, contact information, and licensing
               details
             </CardDescription>
@@ -276,39 +305,46 @@ export default function Page() {
               onValueChange={setActiveTab}
               className="w-full"
             >
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="grid grid-cols-4 sm:grid-cols-4 overflow-x-auto w-full">
                 <TabsTrigger
                   value="business"
-                  className="flex items-center space-x-2"
+                  className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm"
                 >
-                  <Building2 className="w-4 h-4" />
-                  <span className="hidden sm:inline">Business Info</span>
+                  <Building2 className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <span className="hidden md:inline">Business</span>
+                  <span className="hidden">Info</span>
                 </TabsTrigger>
                 <TabsTrigger
                   value="contact"
-                  className="flex items-center space-x-2"
+                  className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm"
                 >
-                  <User className="w-4 h-4" />
-                  <span className="hidden sm:inline">Contact</span>
+                  <User className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <span className="hidden md:inline">Contact</span>
+                  <span className="hidden">Person</span>
                 </TabsTrigger>
                 <TabsTrigger
                   value="details"
-                  className="flex items-center space-x-2"
+                  className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm"
                 >
-                  <FileText className="w-4 h-4" />
-                  <span className="hidden sm:inline">Details</span>
+                  <FileText className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <span className="hidden md:inline">Details</span>
+                  <span className="hidden">Desc</span>
                 </TabsTrigger>
                 <TabsTrigger
                   value="licenses"
-                  className="flex items-center space-x-2"
+                  className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm"
                 >
-                  <Upload className="w-4 h-4" />
-                  <span className="hidden sm:inline">Licenses</span>
+                  <Upload className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <span className="hidden md:inline">Licenses</span>
+                  <span className="hidden">Docs</span>
                 </TabsTrigger>
               </TabsList>
 
-              <TabsContent value="business" className="space-y-6 mt-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <TabsContent
+                value="business"
+                className="space-y-4 sm:space-y-6 mt-4 sm:mt-6"
+              >
+                <div className="grid grid-cols-1 gap-4 sm:gap-6">
                   <div className="space-y-4">
                     <div>
                       <Label htmlFor="businessName">Business Name *</Label>
@@ -319,7 +355,7 @@ export default function Page() {
                         onChange={(e) =>
                           handleInputChange("businessName", e.target.value)
                         }
-                        className="mt-1"
+                        className="mt-1 w-full text-sm"
                       />
                     </div>
                     <div>
@@ -330,7 +366,7 @@ export default function Page() {
                           handleInputChange("businessType", value)
                         }
                       >
-                        <SelectTrigger className="mt-1">
+                        <SelectTrigger className="mt-1 w-full text-sm">
                           <SelectValue placeholder="Select business type" />
                         </SelectTrigger>
                         <SelectContent>
@@ -351,11 +387,9 @@ export default function Page() {
                         onChange={(e) =>
                           handleInputChange("taxId", e.target.value)
                         }
-                        className="mt-1"
+                        className="mt-1 w-full text-sm"
                       />
                     </div>
-                  </div>
-                  <div className="space-y-4">
                     <div>
                       <Label htmlFor="establishedYear">
                         Established Year *
@@ -368,7 +402,7 @@ export default function Page() {
                         onChange={(e) =>
                           handleInputChange("establishedYear", e.target.value)
                         }
-                        className="mt-1"
+                        className="mt-1 w-full text-sm"
                       />
                     </div>
                     <div>
@@ -382,7 +416,7 @@ export default function Page() {
                         onChange={(e) =>
                           handleInputChange("numberOfEmployees", e.target.value)
                         }
-                        className="mt-1"
+                        className="mt-1 w-full text-sm"
                       />
                     </div>
                     <div>
@@ -394,17 +428,20 @@ export default function Page() {
                         onChange={(e) =>
                           handleInputChange("website", e.target.value)
                         }
-                        className="mt-1"
+                        className="mt-1 w-full text-sm"
                       />
                     </div>
                   </div>
                 </div>
               </TabsContent>
 
-              <TabsContent value="contact" className="space-y-6 mt-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <TabsContent
+                value="contact"
+                className="space-y-4 sm:space-y-6 mt-4 sm:mt-6"
+              >
+                <div className="grid grid-cols-1 gap-4 sm:gap-6">
                   <div className="space-y-4">
-                    <h3>Contact Person</h3>
+                    <h3 className="text-base sm:text-lg">Contact Person</h3>
                     <div>
                       <Label htmlFor="contactPersonName">Full Name *</Label>
                       <Input
@@ -414,7 +451,7 @@ export default function Page() {
                         onChange={(e) =>
                           handleInputChange("contactPersonName", e.target.value)
                         }
-                        className="mt-1"
+                        className="mt-1 w-full text-sm"
                       />
                     </div>
                     <div>
@@ -427,7 +464,7 @@ export default function Page() {
                         onChange={(e) =>
                           handleInputChange("contactEmail", e.target.value)
                         }
-                        className="mt-1"
+                        className="mt-1 w-full text-sm"
                       />
                     </div>
                     <div>
@@ -440,12 +477,12 @@ export default function Page() {
                         onChange={(e) =>
                           handleInputChange("contactPhone", e.target.value)
                         }
-                        className="mt-1"
+                        className="mt-1 w-full text-sm"
                       />
                     </div>
                   </div>
                   <div className="space-y-4">
-                    <h3>Business Address</h3>
+                    <h3 className="text-base sm:text-lg">Business Address</h3>
                     <div>
                       <Label htmlFor="street">Street Address *</Label>
                       <Input
@@ -455,7 +492,7 @@ export default function Page() {
                         onChange={(e) =>
                           handleInputChange("street", e.target.value)
                         }
-                        className="mt-1"
+                        className="mt-1 w-full text-sm"
                       />
                     </div>
                     <div>
@@ -467,10 +504,10 @@ export default function Page() {
                         onChange={(e) =>
                           handleInputChange("building", e.target.value)
                         }
-                        className="mt-1"
+                        className="mt-1 w-full text-sm"
                       />
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 gap-4">
                       <div>
                         <Label htmlFor="city">City *</Label>
                         <Input
@@ -480,7 +517,7 @@ export default function Page() {
                           onChange={(e) =>
                             handleInputChange("city", e.target.value)
                           }
-                          className="mt-1"
+                          className="mt-1 w-full text-sm"
                         />
                       </div>
                       <div>
@@ -492,7 +529,7 @@ export default function Page() {
                           onChange={(e) =>
                             handleInputChange("country", e.target.value)
                           }
-                          className="mt-1"
+                          className="mt-1 w-full text-sm"
                         />
                       </div>
                     </div>
@@ -500,8 +537,11 @@ export default function Page() {
                 </div>
               </TabsContent>
 
-              <TabsContent value="details" className="space-y-6 mt-6">
-                <div className="space-y-6">
+              <TabsContent
+                value="details"
+                className="space-y-4 sm:space-y-6 mt-4 sm:mt-6"
+              >
+                <div className="space-y-4">
                   <div>
                     <Label htmlFor="businessDescription">
                       Business Description *
@@ -513,16 +553,16 @@ export default function Page() {
                       onChange={(e) =>
                         handleInputChange("businessDescription", e.target.value)
                       }
-                      className="mt-1 min-h-[120px]"
+                      className="mt-1 min-h-[100px] sm:min-h-[120px] text-sm"
                     />
-                    <p className="text-sm text-muted-foreground mt-1">
+                    <p className="text-xs sm:text-sm text-muted-foreground mt-1">
                       Tell customers about your business, experience, and what
                       makes you unique.
                     </p>
                   </div>
                   <div>
                     <Label>Specializations *</Label>
-                    <p className="text-sm text-muted-foreground mb-3">
+                    <p className="text-xs sm:text-sm text-muted-foreground mb-2 sm:mb-3">
                       Select all categories that apply to your business
                     </p>
                     <div className="flex flex-wrap gap-2">
@@ -534,7 +574,7 @@ export default function Page() {
                               ? "default"
                               : "outline"
                           }
-                          className="cursor-pointer hover:opacity-80 transition-opacity"
+                          className="cursor-pointer text-xs sm:text-sm py-1 px-2 hover:opacity-80 transition-opacity"
                           onClick={() => handleSpecializationToggle(spec)}
                         >
                           {formData.specializations.includes(spec) && (
@@ -548,9 +588,12 @@ export default function Page() {
                 </div>
               </TabsContent>
 
-              <TabsContent value="licenses" className="space-y-6 mt-6">
-                <div className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <TabsContent
+                value="licenses"
+                className="space-y-4 sm:space-y-6 mt-4 sm:mt-6"
+              >
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 gap-4">
                     <div>
                       <Label htmlFor="licenseType">License Type *</Label>
                       <Select
@@ -559,7 +602,7 @@ export default function Page() {
                           handleInputChange("licenseType", value)
                         }
                       >
-                        <SelectTrigger className="mt-1">
+                        <SelectTrigger className="mt-1 w-full text-sm">
                           <SelectValue placeholder="Select license type" />
                         </SelectTrigger>
                         <SelectContent>
@@ -580,7 +623,7 @@ export default function Page() {
                         onChange={(e) =>
                           handleInputChange("licenseNumber", e.target.value)
                         }
-                        className="mt-1"
+                        className="mt-1 w-full text-sm"
                       />
                     </div>
                   </div>
@@ -589,17 +632,16 @@ export default function Page() {
                   <div>
                     <Label htmlFor="licenseFiles">License Documents</Label>
                     <div className="mt-2 space-y-3">
-                      {/* Modern Upload Zone */}
                       <label
                         htmlFor="licenseFiles"
-                        className="flex flex-col items-center justify-center w-full p-6 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer bg-white hover:border-primary hover:bg-blue-50 transition-colors"
+                        className="flex flex-col items-center justify-center w-full p-4 sm:p-6 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer bg-white hover:border-primary hover:bg-blue-50 transition-colors"
                       >
-                        <Upload className="w-6 h-6 text-gray-500 mb-2" />
-                        <span className="text-sm text-gray-600">
-                          Click to upload or drag & drop
+                        <Upload className="w-5 h-5 sm:w-6 sm:h-6 text-gray-500 mb-2" />
+                        <span className="text-xs sm:text-sm text-gray-600">
+                          Tap to upload
                         </span>
                         <span className="text-xs text-muted-foreground mt-1">
-                          Multiple files allowed: PDF, JPG, PNG (Max 10MB each)
+                          PDF, JPG, PNG (Max 10MB)
                         </span>
                         <Input
                           id="licenseFiles"
@@ -619,16 +661,16 @@ export default function Page() {
                             {formData.existingFiles.map((file, idx) => (
                               <div
                                 key={idx}
-                                className="flex items-center justify-between p-3 bg-blue-50 border border-blue-200 rounded-lg"
+                                className="flex items-center justify-between p-2 sm:p-3 bg-blue-50 border border-blue-200 rounded-lg"
                               >
-                                <span className="text-sm text-blue-700 truncate max-w-xs">
+                                <span className="text-xs sm:text-sm text-blue-700 truncate max-w-[80%]">
                                   {typeof file === "string"
                                     ? file.split("/").pop()
                                     : file}
                                 </span>
                                 <Badge
                                   variant="outline"
-                                  className="text-blue-600 border-blue-300"
+                                  className="text-blue-600 border-blue-300 text-xs"
                                 >
                                   Uploaded
                                 </Badge>
@@ -640,95 +682,6 @@ export default function Page() {
                   </div>
                 </div>
               </TabsContent>
-
-              {/* <TabsContent value="licenses" className="space-y-6 mt-6">
-                <div className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <Label htmlFor="licenseType">License Type *</Label>
-                      <Select
-                        value={formData.licenseType}
-                        onValueChange={(value) =>
-                          handleInputChange("licenseType", value)
-                        }
-                      >
-                        <SelectTrigger className="mt-1">
-                          <SelectValue placeholder="Select license type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {licenseTypes.map((type) => (
-                            <SelectItem key={type} value={type}>
-                              {type}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Label htmlFor="licenseNumber">License Number *</Label>
-                      <Input
-                        id="licenseNumber"
-                        placeholder="LIC-123456789"
-                        value={formData.licenseNumber}
-                        onChange={(e) =>
-                          handleInputChange("licenseNumber", e.target.value)
-                        }
-                        className="mt-1"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <Label htmlFor="licenseFile">License Document</Label>
-                    <div className="mt-2 space-y-3">
-                      {formData.existingFileName && !formData.uploadedFile && (
-                        <div className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-xl">
-                          <div className="flex items-center space-x-2">
-                            <CheckCircle className="w-4 h-4 text-green-600" />
-                            <span className="text-sm text-green-800">
-                              Current file: {formData.existingFileName}
-                            </span>
-                          </div>
-                          <Badge variant="secondary">Uploaded</Badge>
-                        </div>
-                      )}
-
-                      <label
-                        htmlFor="licenseFile"
-                        className="flex flex-col items-center justify-center w-full p-6 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer bg-white hover:border-primary hover:bg-blue-50 transition-colors"
-                      >
-                        <Upload className="w-6 h-6 text-gray-500 mb-2" />
-                        <span className="text-sm text-gray-600">
-                          Click to upload or drag & drop
-                        </span>
-                        <span className="text-xs text-muted-foreground mt-1">
-                          PDF, JPG, PNG (Max 10MB)
-                        </span>
-                        <Input
-                          id="licenseFile"
-                          type="file"
-                          accept=".pdf,.jpg,.jpeg,.png"
-                          onChange={handleFileUpload}
-                          className="hidden"
-                        />
-                      </label>
-
-                      {formData.uploadedFile && (
-                        <div className="flex items-center justify-between p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                          <span className="text-sm text-blue-700">
-                            New file selected: {formData.uploadedFile.name}
-                          </span>
-                          <Badge
-                            variant="outline"
-                            className="text-blue-600 border-blue-300"
-                          >
-                            Ready to upload
-                          </Badge>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </TabsContent> */}
             </Tabs>
           </CardContent>
         </Card>

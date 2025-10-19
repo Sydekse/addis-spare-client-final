@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, ChangeEvent } from "react";
+import { useState, ChangeEvent, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -11,26 +11,39 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
-import { getCurrentUser, updateUser, type User } from "@/lib/auth";
-import { Copy, Edit, Save, X, Camera } from "lucide-react";
+import { User } from "@/types/user";
+import { Edit, Save, X } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
 
 export default function UserProfile() {
-  const [user, setUser] = useState<User>(getCurrentUser());
+  const { user } = useAuth();
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const [formData, setFormData] = useState({
-    name: user.name,
-    email: user.email,
-    phone: user.contact?.phone || "",
-    address: user.contact?.address || "",
-    city: user.contact?.city || "",
-    country: user.contact?.country || "",
+    name: "",
+    email: "",
+    phone: "",
+    address: "",
+    city: "",
+    country: "",
   });
+
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        name: user.name || "",
+        email: user.email || "",
+        phone: user.contact?.phone || "",
+        address: user.contact?.address || "",
+        city: user.contact?.city || "",
+        country: user.contact?.country || "",
+      });
+    }
+  }, [user]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({
@@ -40,11 +53,17 @@ export default function UserProfile() {
   };
 
   const handleSave = async () => {
+    if (!user) {
+      toast.error("User not authenticated");
+      return;
+    }
+
     setIsLoading(true);
     try {
       const updatedUserData: Partial<User> = {
         name: formData.name,
         email: formData.email,
+        // avatar: formData.avatar,
         contact: {
           phone: formData.phone,
           address: formData.address,
@@ -53,11 +72,10 @@ export default function UserProfile() {
         },
       };
 
-      const updatedUser = await updateUser(updatedUserData);
-      setUser(updatedUser);
       setIsEditing(false);
-      toast.success("Profile updated successfully!");
-    } catch {
+      toast.success("Profile updated successfully!", updatedUserData);
+    } catch (error) {
+      console.error("Failed to update profile:", error);
       toast.error("Failed to update profile");
     } finally {
       setIsLoading(false);
@@ -66,19 +84,14 @@ export default function UserProfile() {
 
   const handleCancel = () => {
     setFormData({
-      name: user.name,
-      email: user.email,
-      phone: user.contact?.phone || "",
-      address: user.contact?.address || "",
-      city: user.contact?.city || "",
-      country: user.contact?.country || "",
+      name: user?.name || "",
+      email: user?.email || "",
+      phone: user?.contact?.phone || "",
+      address: user?.contact?.address || "",
+      city: user?.contact?.city || "",
+      country: user?.contact?.country || "",
     });
     setIsEditing(false);
-  };
-
-  const copyUserId = () => {
-    navigator.clipboard.writeText(user._id);
-    toast.success("User ID copied to clipboard!");
   };
 
   const getStatusColor = (status: string) => {
@@ -110,132 +123,130 @@ export default function UserProfile() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
       {/* Header Actions */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1>Profile Settings</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-xl sm:text-2xl font-semibold">
+            Profile Settings
+          </h1>
+          <p className="text-sm sm:text-base text-muted-foreground">
             Manage your personal information and account settings
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 w-full sm:w-auto">
           {isEditing ? (
             <>
               <Button
                 variant="outline"
                 onClick={handleCancel}
                 disabled={isLoading}
+                className="flex-1 sm:flex-none text-xs sm:text-sm py-2"
               >
-                <X className="h-4 w-4 mr-2" />
+                <X className="h-4 w-4 mr-1 sm:mr-2" />
                 Cancel
               </Button>
-              <Button onClick={handleSave} disabled={isLoading}>
-                <Save className="h-4 w-4 mr-2" />
-                {isLoading ? "Saving..." : "Save Changes"}
+              <Button
+                onClick={handleSave}
+                disabled={isLoading}
+                className="flex-1 sm:flex-none text-xs sm:text-sm py-2"
+              >
+                <Save className="h-4 w-4 mr-1 sm:mr-2" />
+                {isLoading ? "Saving..." : "Save"}
               </Button>
             </>
           ) : (
-            <Button onClick={() => setIsEditing(true)}>
-              <Edit className="h-4 w-4 mr-2" />
+            <Button
+              onClick={() => setIsEditing(true)}
+              className="w-full sm:w-auto text-xs sm:text-sm py-2"
+            >
+              <Edit className="h-4 w-4 mr-1 sm:mr-2" />
               Edit Profile
             </Button>
           )}
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-4 sm:gap-6">
         {/* Profile Overview Card */}
-        <Card className="lg:col-span-1">
-          <CardHeader className="text-center">
-            <div className="relative mx-auto w-24 h-24 mb-4">
-              <Avatar className="w-24 h-24">
-                <AvatarImage src={user.avatar} />
-                <AvatarFallback className="text-lg">
-                  {user.name
-                    .split(" ")
-                    .map((n) => n[0])
-                    .join("")}
-                </AvatarFallback>
-              </Avatar>
-              <Button
-                size="sm"
-                variant="outline"
-                className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full p-0"
-                disabled={!isEditing}
+        <Card className="grid grid-cols-2">
+          <CardHeader className="border-r flex flex-col items-center justify-center">
+            <CardTitle className="text-lg sm:text-xl">
+              {formData.name}
+            </CardTitle>
+            <CardDescription className="text-sm">
+              {formData.email}
+            </CardDescription>
+            <div className="flex justify-center gap-2 mt-3 sm:mt-4">
+              <Badge
+                className={getRoleColor(user?.role || "")}
+                variant="secondary"
+                style={{ fontSize: "0.75rem", padding: "0.25rem 0.5rem" }}
               >
-                <Camera className="h-4 w-4" />
-              </Button>
-            </div>
-            <CardTitle>{user.name}</CardTitle>
-            <CardDescription>{user.email}</CardDescription>
-            <div className="flex justify-center gap-2 mt-4">
-              <Badge className={getRoleColor(user.role)} variant="secondary">
-                {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                {user?.role
+                  ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+                  : "N/A"}
               </Badge>
               <Badge
-                className={getStatusColor(user.status)}
+                className={getStatusColor(user?.status || "")}
                 variant="secondary"
+                style={{ fontSize: "0.75rem", padding: "0.25rem 0.5rem" }}
               >
-                {user.status.charAt(0).toUpperCase() + user.status.slice(1)}
+                {user?.status
+                  ? user.status.charAt(0).toUpperCase() + user.status.slice(1)
+                  : "N/A"}
               </Badge>
             </div>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <div>
-                <Label className="text-xs text-muted-foreground">User ID</Label>
-                <div className="flex items-center gap-2 mt-1">
-                  <code className="text-xs bg-muted px-2 py-1 rounded flex-1 truncate">
-                    {user._id}
-                  </code>
-                  <Button size="sm" variant="ghost" onClick={copyUserId}>
-                    <Copy className="h-3 w-3" />
-                  </Button>
-                </div>
-              </div>
-              <Separator />
-              <div>
-                <Label className="text-xs text-muted-foreground">
-                  Member Since
-                </Label>
-                <p className="text-sm mt-1">
-                  {new Date(user.createdAt).toLocaleDateString("en-US", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })}
-                </p>
-              </div>
-              <div>
-                <Label className="text-xs text-muted-foreground">
-                  Last Updated
-                </Label>
-                <p className="text-sm mt-1">
-                  {new Date(user.updatedAt).toLocaleDateString("en-US", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })}
-                </p>
-              </div>
+          <CardContent className="space-y-3">
+            <div>
+              <Label className="text-xs text-muted-foreground">
+                Member Since
+              </Label>
+              <p className="text-xs sm:text-sm mt-1">
+                {user?.createdAt
+                  ? new Date(user.createdAt).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })
+                  : "N/A"}
+              </p>
+            </div>
+            <div>
+              <Label className="text-xs text-muted-foreground">
+                Last Updated
+              </Label>
+              <p className="text-xs sm:text-sm mt-1">
+                {user?.updatedAt
+                  ? new Date(user.updatedAt).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })
+                  : "N/A"}
+              </p>
             </div>
           </CardContent>
         </Card>
 
         {/* Profile Details Card */}
-        <Card className="lg:col-span-2">
+        <Card>
           <CardHeader>
-            <CardTitle>Personal Information</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-lg sm:text-xl">
+              Personal Information
+            </CardTitle>
+            <CardDescription className="text-sm">
               Update your personal details and contact information
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-4 sm:space-y-6">
             {/* Basic Information */}
             <div className="space-y-4">
-              <h3 className="font-medium">Basic Information</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <h3 className="font-medium text-base sm:text-lg">
+                Basic Information
+              </h3>
+              <div className="grid grid-cols-1 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="name">Full Name</Label>
                   <Input
@@ -246,6 +257,7 @@ export default function UserProfile() {
                     }
                     disabled={!isEditing}
                     placeholder="Enter your full name"
+                    className="text-sm w-full"
                   />
                 </div>
                 <div className="space-y-2">
@@ -259,6 +271,7 @@ export default function UserProfile() {
                     }
                     disabled={!isEditing}
                     placeholder="Enter your email"
+                    className="text-sm w-full"
                   />
                 </div>
               </div>
@@ -268,8 +281,10 @@ export default function UserProfile() {
 
             {/* Contact Information */}
             <div className="space-y-4">
-              <h3 className="font-medium">Contact Information</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <h3 className="font-medium text-base sm:text-lg">
+                Contact Information
+              </h3>
+              <div className="grid grid-cols-1 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="phone">Phone Number</Label>
                   <Input
@@ -280,6 +295,20 @@ export default function UserProfile() {
                     }
                     disabled={!isEditing}
                     placeholder="Enter your phone number"
+                    className="text-sm w-full"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="address">Address</Label>
+                  <Input
+                    id="address"
+                    value={formData.address}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                      handleInputChange("address", e.target.value)
+                    }
+                    disabled={!isEditing}
+                    placeholder="Enter your address"
+                    className="text-sm w-full"
                   />
                 </div>
                 <div className="space-y-2">
@@ -292,18 +321,7 @@ export default function UserProfile() {
                     }
                     disabled={!isEditing}
                     placeholder="Enter your city"
-                  />
-                </div>
-                <div className="space-y-2 md:col-span-2">
-                  <Label htmlFor="address">Address</Label>
-                  <Input
-                    id="address"
-                    value={formData.address}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                      handleInputChange("address", e.target.value)
-                    }
-                    disabled={!isEditing}
-                    placeholder="Enter your address"
+                    className="text-sm w-full"
                   />
                 </div>
                 <div className="space-y-2">
@@ -316,6 +334,7 @@ export default function UserProfile() {
                     }
                     disabled={!isEditing}
                     placeholder="Enter your country"
+                    className="text-sm w-full"
                   />
                 </div>
               </div>
@@ -323,43 +342,6 @@ export default function UserProfile() {
           </CardContent>
         </Card>
       </div>
-
-      {/* Account Settings */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Account Settings</CardTitle>
-          <CardDescription>
-            Manage your account preferences and security settings
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 border rounded-lg">
-              <div>
-                <h4 className="font-medium">Password</h4>
-                <p className="text-sm text-muted-foreground">
-                  Last updated 3 months ago
-                </p>
-              </div>
-              <Button variant="outline" disabled>
-                Change Password
-              </Button>
-            </div>
-
-            <div className="flex items-center justify-between p-4 border rounded-lg">
-              <div>
-                <h4 className="font-medium">Notification Preferences</h4>
-                <p className="text-sm text-muted-foreground">
-                  Manage how you receive notifications
-                </p>
-              </div>
-              <Button variant="outline" disabled>
-                Manage
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }
