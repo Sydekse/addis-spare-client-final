@@ -5,7 +5,7 @@ import { useState } from "react";
 export function useCloudinaryUpload() {
   const [loading, setLoading] = useState(false);
   const [url, setUrl] = useState(null);
-  const cloudName = 'dcvgd4fth';
+  const cloudName = "dcvgd4fth";
 
   async function uploadImage(file: File) {
     setLoading(true);
