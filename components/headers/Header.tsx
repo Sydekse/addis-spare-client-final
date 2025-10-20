@@ -7,6 +7,7 @@ import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import { useCart } from "@/context/use-cart";
 import { useAuth } from "@/hooks/use-auth";
+import Image from "next/image";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -53,7 +54,14 @@ export function Header() {
 
             <Link href="/" className="flex items-center space-x-2">
               <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                <span className="text-primary-foreground font-bold">A</span>
+                {/* <span className="text-primary-foreground font-bold">A</span> */}
+                <Image
+                  src="/images/asp-logo.png"
+                  alt="Addis Spare Parts"
+                  className="rounded-full bg-white"
+                  width={50}
+                  height={50}
+                />
               </div>
               <span className="hidden md:block font-bold text-lg">
                 Addis Spare Parts
