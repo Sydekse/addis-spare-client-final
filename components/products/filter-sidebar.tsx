@@ -33,10 +33,11 @@ export default function FilterSidebar({ categories }: FilterSidebarProps) {
     if (categoryId === "all") {
       params.delete("category")
     } else {
-      params.set("category", categoryId)
+      const cat =  categories.find((c) => c.id === categoryId);
+      if (cat) params.set("category", cat.name)
     }
 
-    router.push(`/?${params.toString()}`)
+    router.push(`/products/?${params.toString()}`)
   }
 
   const handlePriceChange = (values: number[]) => {
@@ -176,114 +177,15 @@ export default function FilterSidebar({ categories }: FilterSidebarProps) {
               <div className="px-2">
                 <Slider
                   defaultValue={[0, 500]}
-                  max={500}
+                  max={10000}
                   step={10}
                   value={priceRange}
                   onValueChange={handlePriceChange}
                   className="my-6"
                 />
                 <div className="flex items-center justify-between text-sm text-gray-700 dark:text-gray-300">
-                  <div>${priceRange[0]}</div>
-                  <div>${priceRange[1]}</div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Brand filter */}
-          <div>
-            <button
-              className="flex items-center justify-between w-full text-left font-medium mb-2 text-gray-900 dark:text-white"
-              onClick={() => toggleSection("brand")}
-            >
-              <h4 className="text-sm">Brand</h4>
-              {expandedSections.brand ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-            </button>
-
-            {expandedSections.brand && (
-              <ul className="space-y-1">
-                <li>
-                  <button className="flex items-center w-full text-left text-gray-500 dark:text-gray-400">
-                    <div className="w-4 h-4 rounded-full border border-gray-300 dark:border-gray-600 mr-2"></div>
-                    <span>ACDelco</span>
-                    <span className="ml-1 text-gray-400 dark:text-gray-500">15</span>
-                  </button>
-                </li>
-                <li>
-                  <button className="flex items-center w-full text-left text-gray-500 dark:text-gray-400">
-                    <div className="w-4 h-4 rounded-full border border-gray-300 dark:border-gray-600 mr-2"></div>
-                    <span>Bosch</span>
-                    <span className="ml-1 text-gray-400 dark:text-gray-500">12</span>
-                  </button>
-                </li>
-                <li>
-                  <button className="flex items-center w-full text-left text-gray-500 dark:text-gray-400">
-                    <div className="w-4 h-4 rounded-full border border-gray-300 dark:border-gray-600 mr-2"></div>
-                    <span>Denso</span>
-                    <span className="ml-1 text-gray-400 dark:text-gray-500">8</span>
-                  </button>
-                </li>
-                <li>
-                  <button className="flex items-center w-full text-left text-gray-500 dark:text-gray-400">
-                    <div className="w-4 h-4 rounded-full border border-gray-300 dark:border-gray-600 mr-2"></div>
-                    <span>Other</span>
-                    <span className="ml-1 text-gray-400 dark:text-gray-500">15</span>
-                  </button>
-                </li>
-              </ul>
-            )}
-          </div>
-
-          {/* Additional Attributes */}
-          <div>
-            <button
-              className="flex items-center justify-between w-full text-left font-medium mb-2 text-gray-900 dark:text-white"
-              onClick={() => toggleSection("attributes")}
-            >
-              <h4 className="text-sm">Additional Attributes</h4>
-              {expandedSections.attributes ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-            </button>
-
-            {expandedSections.attributes && (
-              <div className="space-y-3">
-                <div>
-                  <h5 className="text-xs font-medium mb-1 text-gray-700 dark:text-gray-300">Material</h5>
-                  <ul className="space-y-1">
-                    <li>
-                      <button className="flex items-center w-full text-left text-gray-500 dark:text-gray-400">
-                        <div className="w-4 h-4 rounded-full border border-gray-300 dark:border-gray-600 mr-2"></div>
-                        <span>Ceramic</span>
-                        <span className="ml-1 text-gray-400 dark:text-gray-500">8</span>
-                      </button>
-                    </li>
-                    <li>
-                      <button className="flex items-center w-full text-left text-gray-500 dark:text-gray-400">
-                        <div className="w-4 h-4 rounded-full border border-gray-300 dark:border-gray-600 mr-2"></div>
-                        <span>Metallic</span>
-                        <span className="ml-1 text-gray-400 dark:text-gray-500">6</span>
-                      </button>
-                    </li>
-                  </ul>
-                </div>
-
-                <div>
-                  <h5 className="text-xs font-medium mb-1 text-gray-700 dark:text-gray-300">Position</h5>
-                  <ul className="space-y-1">
-                    <li>
-                      <button className="flex items-center w-full text-left text-gray-500 dark:text-gray-400">
-                        <div className="w-4 h-4 rounded-full border border-gray-300 dark:border-gray-600 mr-2"></div>
-                        <span>Front</span>
-                        <span className="ml-1 text-gray-400 dark:text-gray-500">12</span>
-                      </button>
-                    </li>
-                    <li>
-                      <button className="flex items-center w-full text-left text-gray-500 dark:text-gray-400">
-                        <div className="w-4 h-4 rounded-full border border-gray-300 dark:border-gray-600 mr-2"></div>
-                        <span>Rear</span>
-                        <span className="ml-1 text-gray-400 dark:text-gray-500">10</span>
-                      </button>
-                    </li>
-                  </ul>
+                  <div>ETB {priceRange[0]}</div>
+                  <div>ETB {priceRange[1]}</div>
                 </div>
               </div>
             )}

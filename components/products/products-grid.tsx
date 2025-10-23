@@ -1,6 +1,5 @@
 "use client"
 
-import { useState } from "react"
 import ProductCard from "./product-card"
 import { Product } from "@/types/product"
 
@@ -18,7 +17,7 @@ interface ProductsGridProps {
 }
 
 export default function ProductsGrid({ initialProducts }: ProductsGridProps) {
-  const [page, setPage] = useState(1)
+  // const [page, setPage] = useState(1)
   const isLoading = false;
 
   const products = initialProducts.products
@@ -51,7 +50,7 @@ export default function ProductsGrid({ initialProducts }: ProductsGridProps) {
       )}
 
       {/* Load more button */}
-      {products.length > 0 && page * 12 < (initialProducts?.total || 0) && (
+      {/* {products.length > 0 && page * 12 < (initialProducts?.total || 0) && (
         <div className="flex justify-center mt-8 pb-8">
           <button
             onClick={() => setPage((p) => p + 1)}
@@ -60,7 +59,7 @@ export default function ProductsGrid({ initialProducts }: ProductsGridProps) {
             Load More Parts
           </button>
         </div>
-      )}
+      )} */}
     </div>
   )
 }

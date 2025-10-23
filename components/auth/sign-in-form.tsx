@@ -2,7 +2,6 @@
 
 import type React from "react";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -13,7 +12,6 @@ import type { SignInFormData } from "@/types/auth";
 import { signIn } from "@/lib/api/services/auth.service";
 
 export default function SignInForm() {
-  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState<SignInFormData>({
     email: "",
@@ -68,7 +66,8 @@ export default function SignInForm() {
 
       console.log("User signed in:", response);
 
-      router.push("/");
+      // router.push("/");
+      window.location.href = "/";
     } catch (error: unknown) {
       console.error("Login error:", error);
       alert(

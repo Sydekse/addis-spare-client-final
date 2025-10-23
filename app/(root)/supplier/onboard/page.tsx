@@ -296,7 +296,7 @@ export default function Page() {
               onValueChange={setActiveTab}
               className="w-full"
             >
-              <TabsList className="grid grid-cols-4 sm:grid-cols-4 overflow-x-auto">
+              <TabsList className="grid grid-cols-4 sm:grid-cols-4 overflow-x-auto w-full">
                 <TabsTrigger
                   value="business"
                   className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm"

@@ -205,11 +205,11 @@ export default function AccountPage() {
       </div>
 
       <Tabs value={activeTab} onValueChange={handleNavigate}>
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="profile">Profile</TabsTrigger>
           <TabsTrigger value="orders">Orders</TabsTrigger>
           <TabsTrigger value="messages">Messages</TabsTrigger>
-          <TabsTrigger value="returns">Returns</TabsTrigger>
+          {/* <TabsTrigger value="returns">Returns</TabsTrigger> */}
         </TabsList>
 
         {/* Profile Tab */}

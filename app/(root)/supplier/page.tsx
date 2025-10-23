@@ -47,14 +47,14 @@ export default function DashboardPage() {
   useEffect(() => {
     const fetchDetails = async () => {
       const orders = await getOrders();
-      setRecentOrders(orders);
+      setRecentOrders(orders.slice(0, 5));
       const products = await getProducts();
-      setRecentProducts(products);
+      setRecentProducts(products.slice(0, 5));
       const inventories = await getInventories();
       const lowStock = inventories.filter(
         (inv) => inv.quantity < inv.reorderTreshould
       );
-      setLowStockInventories(lowStock);
+      setLowStockInventories(lowStock.slice(0, 5));
     };
 
     fetchDetails();

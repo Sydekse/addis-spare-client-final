@@ -36,12 +36,12 @@ export default function SearchHeader({ makes, models, years }: SearchHeaderProps
   const handleSearch = () => {
     const params = new URLSearchParams()
 
-    if (selectedMake !== "all") params.set("make", selectedMake)
-    if (selectedModel !== "all") params.set("model", selectedModel)
-    if (selectedYear !== "all") params.set("year", selectedYear)
+    if (selectedMake !== "all") params.set("make", makes.find((m) => m.id === selectedMake)?.name || "")
+    if (selectedModel !== "all") params.set("model", models.find((m) => m.id === selectedModel)?.name || "")
+    if (selectedYear !== "all") params.set("year", years.find((y) => y.id === selectedYear)?.year.toString() || "")
     if (searchQuery.trim()) params.set("q", searchQuery.trim())
 
-    router.push(`/?${params.toString()}`)
+    router.push(`/products?${params.toString()}`)
   }
 
   return (
@@ -121,20 +121,6 @@ export default function SearchHeader({ makes, models, years }: SearchHeaderProps
           <Button onClick={handleSearch} className="w-full h-10 bg-[#670D2F] hover:bg-[#670D2F]/90 text-white">
             Search Parts
           </Button>
-        </div>
-      </div>
-
-      <div className="flex items-center justify-between mt-4">
-        <div className="flex items-center">
-          <div className="flex items-center">
-            <div className="text-amber-400">★★★★★</div>
-            <span className="text-sm ml-1 text-gray-700 dark:text-gray-300">4.6 of 5</span>
-          </div>
-          <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">Based on 2500+ reviews</span>
-        </div>
-
-        <div className="text-sm text-gray-500 dark:text-gray-400">
-          <span>United States</span>
         </div>
       </div>
     </div>
