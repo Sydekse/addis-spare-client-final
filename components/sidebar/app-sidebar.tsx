@@ -29,6 +29,7 @@ import {
   BaggageClaim,
   Mail,
 } from "lucide-react";
+import Link from "next/link";
 
 interface MenuItem {
   title: string;
@@ -161,7 +162,7 @@ export function AdminSidebar() {
                         asChild
                         tooltip={collapsed ? item.title : undefined}
                       >
-                        <a
+                        <Link
                           href={item.url}
                           className={`flex items-center gap-2 transition-colors duration-200 ${
                             isActive
@@ -171,7 +172,7 @@ export function AdminSidebar() {
                         >
                           <item.icon className="h-4 w-4" />
                           {!collapsed && <span>{item.title}</span>}
-                        </a>
+                        </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
                   );
@@ -202,15 +203,15 @@ export function SupplierSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <a href="/supplier/">
+              <Link href="/supplier/">
                 <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
                   <ShoppingBag className="size-4" />
                 </div>
                 <div className="flex flex-col gap-0.5 leading-none">
-                  <span className="font-medium">Supplier Portal</span>
+                  <span className="font-medium">Addis Spare Part</span>
                   <span className="">v1.0.0</span>
                 </div>
-              </a>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

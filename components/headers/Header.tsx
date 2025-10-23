@@ -80,12 +80,12 @@ export function Header() {
                   <Button variant="ghost" size="sm">
                     <Bell className="h-5 w-5" />
                   </Button>
-                  <Badge
+                  {/* <Badge
                     variant="destructive"
                     className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center text-xs"
                   >
-                    3
-                  </Badge>
+                    
+                  </Badge> */}
                 </Link>
               </>
             )}

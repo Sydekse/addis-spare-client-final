@@ -18,7 +18,7 @@ export default function FilterSidebar({ categories }: FilterSidebarProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const currentCategory = searchParams.get("category") || "all"
-  const [priceRange, setPriceRange] = useState([0, 500])
+  const [priceRange, setPriceRange] = useState([0, 10000])
   const [expandedSections, setExpandedSections] = useState({
     category: true,
     compatibility: true,
@@ -176,7 +176,7 @@ export default function FilterSidebar({ categories }: FilterSidebarProps) {
             {expandedSections.price && (
               <div className="px-2">
                 <Slider
-                  defaultValue={[0, 500]}
+                  defaultValue={[0, 10000]}
                   max={10000}
                   step={10}
                   value={priceRange}
