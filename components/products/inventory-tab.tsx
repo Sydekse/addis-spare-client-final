@@ -61,7 +61,7 @@ export default function ProductInventories({
     productId: product.id,
     location: "",
     quantity: 0,
-    reorderTreshould: 0,
+    reorderTreshold: 0,
     supplierId: user?.id,
   });
 
@@ -86,7 +86,7 @@ export default function ProductInventories({
         productId: product.id,
         location: "",
         quantity: 0,
-        reorderTreshould: 0,
+        reorderTreshold: 0,
         supplierId: user?.id,
       });
     } catch (err) {
@@ -175,7 +175,7 @@ export default function ProductInventories({
                               productId: inv.productId,
                               location: inv.location,
                               quantity: inv.quantity,
-                              reorderTreshould: inv.reorderTreshould,
+                              reorderTreshold: inv.reorderTreshould,
                               supplierId: inv.supplierId,
                             });
                           }}
@@ -225,7 +225,7 @@ export default function ProductInventories({
             <Input
               type="number"
               placeholder="Reorder Threshold"
-              value={formData.reorderTreshould}
+              value={formData.reorderTreshold}
               onChange={(e) =>
                 handleInputChange("reorderThreshold", parseInt(e.target.value))
               }
@@ -275,7 +275,7 @@ export default function ProductInventories({
               <Input
                 type="number"
                 placeholder="Reorder Threshold"
-                value={formData.reorderTreshould}
+                value={formData.reorderTreshold}
                 onChange={(e) =>
                   handleInputChange(
                     "reorderThreshold",
