@@ -4,7 +4,7 @@ export interface CreateInventoryDto {
   productId: string;
   location: string;
   quantity: number;
-  reorderTreshold: number;
+  reorderThreshold: number;
   supplierId?: string;
 }
 
@@ -12,7 +12,7 @@ export interface UpdateInventoryDto {
   productId: string;
   location: string;
   quantity: number;
-  reorderTreshold: number;
+  reorderThreshold: number;
   supplierId?: string;
 }
 
@@ -21,7 +21,7 @@ export interface Inventory {
   productId: string;
   location: string;
   quantity: number;
-  reorderTreshould: number;
+  reorderThreshold: number;
   supplierId?: string;
   lastUpdated: Date;
   product: Product;

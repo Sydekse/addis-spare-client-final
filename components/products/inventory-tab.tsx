@@ -61,16 +61,16 @@ export default function ProductInventories({
     productId: product.id,
     location: "",
     quantity: 0,
-    reorderTreshold: 0,
+    reorderThreshold: 0,
     supplierId: user?.id,
   });
 
   const handleInputChange = (field: string, value: unknown) => {
     const normalizedValue =
       typeof value === "string" && value.trim() === "" ? "" : value;
-    if (field === "reorderTreshould" || field === "reorderThreshold") {
+    if (field === "reorderThreshold" || field === "reorderThreshold") {
       setFormData((prev) => {
-        return { ...prev, reorderTreshould: Number(normalizedValue) };
+        return { ...prev, reorderThreshold: Number(normalizedValue) };
       });
     } else setFormData((prev) => ({ ...prev, [field]: normalizedValue }));
   };
@@ -86,7 +86,7 @@ export default function ProductInventories({
         productId: product.id,
         location: "",
         quantity: 0,
-        reorderTreshold: 0,
+        reorderThreshold: 0,
         supplierId: user?.id,
       });
     } catch (err) {
@@ -161,7 +161,7 @@ export default function ProductInventories({
                       {inv.quantity}
                     </TableCell>
                     <TableCell className="text-center">
-                      {inv.reorderTreshould}
+                      {inv.reorderThreshold}
                     </TableCell>
                     <TableCell>{inv.supplierId || "—"}</TableCell>
                     <TableCell className="text-right">
@@ -175,7 +175,7 @@ export default function ProductInventories({
                               productId: inv.productId,
                               location: inv.location,
                               quantity: inv.quantity,
-                              reorderTreshold: inv.reorderTreshould,
+                              reorderThreshold: inv.reorderThreshold,
                               supplierId: inv.supplierId,
                             });
                           }}
@@ -225,7 +225,7 @@ export default function ProductInventories({
             <Input
               type="number"
               placeholder="Reorder Threshold"
-              value={formData.reorderTreshold}
+              value={formData.reorderThreshold}
               onChange={(e) =>
                 handleInputChange("reorderThreshold", parseInt(e.target.value))
               }
@@ -275,7 +275,7 @@ export default function ProductInventories({
               <Input
                 type="number"
                 placeholder="Reorder Threshold"
-                value={formData.reorderTreshold}
+                value={formData.reorderThreshold}
                 onChange={(e) =>
                   handleInputChange(
                     "reorderThreshold",
