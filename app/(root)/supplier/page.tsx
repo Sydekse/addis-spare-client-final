@@ -52,7 +52,7 @@ export default function DashboardPage() {
       setRecentProducts(products.slice(0, 5));
       const inventories = await getInventories();
       const lowStock = inventories.filter(
-        (inv) => inv.quantity < inv.reorderTreshould
+        (inv) => inv.quantity < inv.reorderThreshold
       );
       setLowStockInventories(lowStock.slice(0, 5));
     };
@@ -298,7 +298,7 @@ export default function DashboardPage() {
                     <div className="text-right">
                       <p className="font-medium">{inventory.quantity} left</p>
                       <p className="text-xs text-muted-foreground">
-                        Min: {inventory.reorderTreshould}
+                        Min: {inventory.reorderThreshold}
                       </p>
                     </div>
                   </div>

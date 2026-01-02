@@ -67,11 +67,11 @@ export default function InventoryManagement() {
 
     let matchesStock = true;
     if (stockFilter === "low") {
-      matchesStock = item.quantity <= item.reorderTreshould;
+      matchesStock = item.quantity <= item.reorderThreshold;
     } else if (stockFilter === "out") {
       matchesStock = item.quantity === 0;
     } else if (stockFilter === "adequate") {
-      matchesStock = item.quantity > item.reorderTreshould;
+      matchesStock = item.quantity > item.reorderThreshold;
     }
 
     return matchesSearch && matchesLocation && matchesStock;
@@ -114,7 +114,7 @@ export default function InventoryManagement() {
   };
 
   const getLowStockItems = () =>
-    inventory.filter((item) => item.quantity <= item.reorderTreshould);
+    inventory.filter((item) => item.quantity <= item.reorderThreshold);
   const getOutOfStockItems = () =>
     inventory.filter((item) => item.quantity === 0);
   const getTotalValue = () =>
@@ -259,7 +259,7 @@ export default function InventoryManagement() {
                 {filteredInventory.map((item) => {
                   const stockStatus = getStockStatus(
                     item.quantity,
-                    item.reorderTreshould
+                    item.reorderThreshold
                   );
                   return (
                     <TableRow
@@ -295,7 +295,7 @@ export default function InventoryManagement() {
                             {item.quantity} units
                           </div>
                           <div className="text-sm text-muted-foreground">
-                            Reorder at {item.reorderTreshould}
+                            Reorder at {item.reorderThreshold}
                           </div>
                         </div>
                       </TableCell>
