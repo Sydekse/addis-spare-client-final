@@ -129,9 +129,7 @@ export function Header() {
                     <>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem asChild>
-                        <Link href="/supplier-dashboard">
-                          Supplier Dashboard
-                        </Link>
+                        <Link href="/supplier">Supplier Dashboard</Link>
                       </DropdownMenuItem>
                     </>
                   )}
@@ -140,7 +138,7 @@ export function Header() {
                     <>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem asChild>
-                        <Link href="/admin-dashboard">Admin Panel</Link>
+                        <Link href="/admin">Admin Panel</Link>
                       </DropdownMenuItem>
                     </>
                   )}
